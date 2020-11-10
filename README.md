@@ -13,6 +13,7 @@
 ### Use cases
 01. Retrieving orderbook data: [HTML](https://deutsche-boerse.github.io/a7/usecases/01_simple_example.html) | [Notebook](/usecases/01_simple_example.ipynb)
 01. Using reference data:  [HTML](https://deutsche-boerse.github.io/a7/usecases/02_simple_rdi.html) | [Notebook](/usecases/02_simple_rdi.ipynb)
+01. Empirical analysis of cash rates benchmark hedging: [HTML](https://deutsche-boerse.github.io/a7/usecases/03_cash_rates_benchmark_hedging.html) | [Notebook](/usecases/03_cash_rates_benchmark_hedging.ipynb)
 
 
 ### Visit us
