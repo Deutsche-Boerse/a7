@@ -1,0 +1,333 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - CME Reference data API (SD)
+  description: >
+    A7 Analytics Platform for the CME Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (MDP) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality.<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via  RESTful API.</br></br>
+    The CME reference data API provides access to the A7 reference data for the available markets and trading days. All available endpoints are described in detail below.<br/><br/>
+      
+    In this documentation only the general data types of the respective fields are described. For the exact data types please refer to the CME documentation.</br>
+    For compatibility reasons fields of type signed/unsigned Int64 (e.g SecurityID) are returned as string.</br></br>
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.1
+servers:
+  - url: /api/v2
+    description: A7 production environment
+    
+paths:
+  /sd/:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve list of exchanges"
+      description: The request delivers all available exchanges.
+      operationId: "getExchanges"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Exchanges"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"          
+  /sd/{exchange}/:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve list of trading days"
+      description: The request delivers all available trading days for the selected exchange.
+      operationId: "getAvailableDates"
+      parameters:
+        - $ref: "#/components/parameters/exchange"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dates"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+          
+  /sd/{exchange}/{date}/:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve list of assets"
+      description: The request delivers a list of all assets for the selected exchange and trading day.
+      operationId: "getAssets"
+      parameters:
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assets"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+
+  /sd/{exchange}/{date}/{asset}/:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve list of securities"
+      description: The request delivers a list of all securities for the selected exchange, trading day and asset.
+      operationId: "getSecurities"
+      parameters:
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/asset"
+ 
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityIDs"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+
+        "422":
+          $ref: "#/components/responses/422"
+
+  /sd/{exchange}/{date}/{asset}:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve details for all securities"
+      description: The request delivers all security details for the selected exchange, trading day and asset.
+      operationId: "getAllSecurities"
+      parameters:
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/asset"
+ 
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+
+        "422":
+          $ref: "#/components/responses/422"          
+
+  /sd/{exchange}/{date}/{asset}/{securityId}:
+    get:
+      tags:
+        - "CME Reference data API"
+      summary: "Retrieve security details"
+      description: The request delivers details for the selected security.
+      operationId: "getSecurityDetails"
+      parameters:
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/asset"
+        - $ref: "#/components/parameters/securityId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+
+        "422":
+          $ref: "#/components/responses/422"
+
+components:
+
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  parameters:
+    asset:
+      name: "asset"
+      in: "path"
+      description: "Unique product identifier or product pool identifier"
+      example: "GE"
+      required: true
+      schema:
+        type: string
+    date:
+      name: "date"
+      in: "path"
+      description: "Trading day in the format  YYYYMMDD"
+      example: 20200106
+      required: true
+      schema:
+        type: "integer"
+        pattern: '^\d{8}$'
+    exchange:
+      name: "exchange"
+      in: "path"
+      description: "Exchange identifier code."
+      example: "XCME"
+      required: true
+      schema:
+        type: "string"
+    securityId:
+      name: "securityId"
+      in: "path"
+      description: "Unique security identifier"
+      example: "27299"
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    Assets:
+      type: array
+      items:
+        type: string
+      example:
+        - "GE"
+        - "SR1"
+        - "SR2"
+    Dates:
+      type: array
+      items:
+        type: integer
+        format: int32
+      example:
+        - 20200102
+        - 20200103
+        - 20200106
+    Exchanges:
+      type: array
+      items:
+        type: string
+      example:
+        - "XCME"
+        - "XFXS"
+    SecurityDetails:
+      type: array
+      items:
+        type: object
+      example:
+      - NoRelatedInstruments: "0"
+        UnderlyingSecurityIDSource: "8"
+        UnderlyingSecurityID: "254273"
+        NoLotTypeRules: "0"
+        NoInstrAttrib: "1"
+        InstrAttribValue: "00000000000001000010000100000111"
+        EventTime: "20210910210000000000"
+        EventType: "7"
+        UserDefinedInstrument: "N"
+        LowLimitPrice: "0.250000000"
+        TradingReferenceDate: "20200819"
+        NoUnderlyings: "1"
+        MarketDepth: "3"
+        SettlPriceType: "00000011"
+        LastUpdateTime: "20200816160152000004"
+        UnderlyingProduct: "14"
+        SecurityGroup: "J4"
+        SecurityExchange: "XCME"
+        MarketSegmentID: "50"
+        SecurityID: "6247"
+        TradingReferencePrice: "313.500000000"
+        SecurityIDSource: "8"
+        MatchAlgorithm: "Q"
+        UnderlyingSymbol: "SR3U5"
+        SecurityUpdateAction: "A"
+        MDFeedType: "GBX"
+        NoEvents: "2"
+        UnitOfMeasureQty: "2500.000000000"
+        ChannelID": "313"
+        MatchEventIndicator: "00000000"
+        SecurityDefinition: "d"
+        SecurityType: "OOF"
+        MinPriceIncrement: "0.500000000"
+        MaxTradeVol: "99999"
+        MinPriceIncrementAmount: "12.500000000"
+        Symbol: "S4U1 P0300"
+        PutOrCall: "0"
+        MinCabPrice: "0.250000000"
+        MaturityMonthYear: "202109"
+        Asset: "S4"
+        DisplayFactor: "1.000000000"
+        StrikeCurrency: "USD"
+        NoMDFeedTypes: "1"
+        Currency: "USD"
+        InstrAttribType: "24"
+        StrikePrice: "10300.000000000"
+        CFICode: "OPAFPS"
+        UnitOfMeasure: "IPNT"
+        HighLimitPrice: "9999900.000000000"
+        MinTradeVol: "1"
+    SecurityIDs:
+      type: array
+      items:
+        type: string
+      example:
+        - "10014"
+        - "10077"
+        - "10096"
+    Error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+  responses:
+    400:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    422:
+      description: Unprocessable entity
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+security:
+  - bearerAuth: []

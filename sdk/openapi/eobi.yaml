@@ -1,0 +1,623 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - Market data API (EOBI)
+  description: |
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data (EOBI)
+    across all T7 exchanges (Eurex, Xetra, etc.).<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via RESTful API.</br></br>
+    The market data API provides access to the A7 (EOBI) market data for the available markets and trading days. All available endpoints are described in detail below.<br/><br/>
+    The following EOBI messages can be accessed:
+      *  MarketDataOrder (U21)
+      *  MarketDataTrade (U22)
+      *  MarketDataInstrument (U23)
+      *  TradingSessionStatus (h)
+      *  SecurityMassStatus (CO)
+      *  SecurityStatus (f)
+      *  SecurityDefinitionUpdateReport (BP)
+    
+    In this documentation the different message types are not specified in full detail and only the general data types of the respective fields are described. For compatibility reasons fields of type signed/unsigned Int64 (e.g SecurityID) are returned as string. For the exact data types please refer to the T7 EOBI documentation available at the [Xetra](https://www.xetra.com/xetra-en/technology/t7/system-documentation) or [Eurex](https://www.eurex.com/ex-en/support/initiatives) homepage.</br>
+    
+    Please be aware that depending on the date for which you are requesting data a different version of the T7 documentation has to be used.</br>
+    | Release | Valid from | Valid to  |
+    | ------- | -------- | -------- |
+    | T7 Release 7.0 | 03.12.2018 | 26.05.2019 |
+    | T7 Release 7.1 | 27.05.2019 | 17.11.2019 |
+    | T7 Release 8.0 | 18.11.2019 | 28.06.2020 |
+    | T7 Release 8.1 | 29.06.2020 | 22.11.2020 |
+    | T7 Release 9.0 | 23.11.2020 | 27.06.2021 |
+    | T7 Release 9.1 | 28.06.2021 | 21.11.2021 |
+    | T7 Release 10.0 | 22.11.2021 | 26.06.2022 |
+    | T7 Release 10.1 | 27.06.2022 | 20.11.2022 |
+    | T7 Release 11.0 | 21.11.2022 | 22.05.2023 |
+    | T7 Release 11.1 | 23.05.2023 | 19.11.2023 |
+    | T7 Release 12.0 | 20.11.2023 | 12.05.2024 |
+    | T7 Release 12.1 | 13.05.2024 | 17.11.2024 |
+    | T7 Release 13.0 | 18.11.2024 | 18.05.2025 |
+    | T7 Release 13.1 | 19.05.2025 | 09.11.2025 |
+    | T7 Release 14.0 | 10.11.2025 | present day |
+
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.1
+servers:
+  - url: /api/v1
+    description: A7 production environment
+  
+paths:
+  /eobi:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of markets"
+      description: "The request delivers all available markets as a list of MarketIDs."
+      operationId: "getMarketIds"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MarketIDs"
+                  - $ref: "#/components/schemas/InternalError"
+              example: 
+                MarketIDs:
+                  - "XETR"
+                  - "XEUR"
+
+              
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /eobi/{marketId}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of trading days"
+      description: "The request delivers all available trading days for the selected market as a list of dates (YYYYMMDD)."
+      operationId: "getAvailableDates"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Dates"
+                  - $ref: "#/components/schemas/InternalError"
+              example:
+                Dates:
+                  - 20200629
+                  - 20200630
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of products"
+      description: "The request delivers a list of all available products for the selected market and trading day as a list of MarketSegmentIDs."
+      operationId: "getMarketSegmentIds"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MarketSegmentIDs"
+                  - $ref: "#/components/schemas/InternalError"
+              example:
+                MarketSegmentIDs:
+                  - 3
+                  - 5
+                  - 21
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}/{marketSegmentId}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of instruments"
+      description: "The request delivers a list of all instruments for the selected market, trading day and MarketSegmentID as a list of SecurityIDs."
+      operationId: "getSecurityIds"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/SecurityIDs"
+                  - $ref: "#/components/schemas/InternalError"
+              example: 
+                SecurityIDs:
+                  - 2346321
+                  - 3426522
+                  - 3242343
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}/{marketSegmentId}/{securityId}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of transaction times"
+      description: >
+        The request delivers a list of the available transaction times for the selected market, trading day, MarketSegmentID and SecurityID as a list of TransactTimes.
+      operationId: "getTransactTimes"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/mode"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/applSeqNumFilter"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TransactTimes"
+                  - $ref: "#/components/schemas/InternalError"
+              example:
+                TransactTimes:
+                  - "1589175000156121100"
+                  - "1589180100007332308"
+                  - "1589180400061095876"
+
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}/{marketSegmentId}/{securityId}/{transactTime}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of application sequence numbers or list of packets"
+      description: > 
+        "The request delivers a list of the available application sequence numbers for the selected market, trading day, MarketSegmentID, SecurityID and TransactTime as a list of ApplSeqNums."<br/>
+        If mode is set to 'detailed', the request returns a list of packets including their respective messages and available details. For a detailed description of the different message types please refer to the T7 EOBI documentation.
+      operationId: "getApplSeqNums"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/transactTime"
+        - $ref: "#/components/parameters/mode"
+        - $ref: "#/components/parameters/msgSeqNumFilter"
+        - $ref: "#/components/parameters/templateIdFilter"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ApplSeqNums'
+                  - $ref: '#/components/schemas/Packets'
+                  - $ref: '#/components/schemas/InternalError'
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}/{marketSegmentId}/{securityId}/{transactTime}/{applSeqNum}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve list of message sequence numbers or a list of messages"
+      description: >
+        The request delivers a list of the available message sequence numbers for the selected market, trading day, MarketSegmentID, SecurityID, TransactTime and ApplSeqNum as a list of MsgSeqNums.<br/>
+        If mode is set to 'detailed', the request returns a list of messages and available details. For a detailed description of the different message types please refer to the T7 EOBI documentation.
+      operationId: "getMsgSeqNums"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/transactTime"
+        - $ref: "#/components/parameters/applSeqNum"
+        - $ref: "#/components/parameters/mode"        
+        - $ref: "#/components/parameters/templateIdFilter"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MsgSeqNums'
+                  - $ref: '#/components/schemas/Messages'
+                  - $ref: '#/components/schemas/InternalError'
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /eobi/{marketId}/{date}/{marketSegmentId}/{securityId}/{transactTime}/{applSeqNum}/{msgSeqNum}:
+    get:
+      tags:
+        - "Market data API (EOBI)"
+      summary: "Retrieve message details"
+      description: "The request delivers the details of the message identified by the selected MarketID, trading day, MarketSegmentID, SecurityID,TransactTime, ApplSeqNum and MsgSeqNum combination. The message details consist of all fields specified in the T7 EOBI documentation for the respective message type. For a detailed description of the different message types please refer to the T7 EOBI documentation."
+      operationId: "getMessageDetails"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/transactTime"
+        - $ref: "#/components/parameters/applSeqNum"
+        - $ref: "#/components/parameters/msgSeqNum"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MessageDetails"
+                  - $ref: '#/components/schemas/InternalError'
+              example:
+                MessageHeader: 
+                  BodyLen: 32
+                  TemplateID: 13301
+                  MsgSeqNum: 27
+                ApplSeqNum: 6745122
+                SecurityID: 4233128
+                SecurityStatus: 1
+                SecurityTradingStatus: 204
+                MarketCondition: 0
+                FastMarketIndicator: 0
+                SecurityTradingEvent: null
+                SoldOutIndicator: null
+                TransactTime: "1589180100007258166"              
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+components:
+
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+
+  parameters:
+    applSeqNum:
+      name: "applSeqNum"
+      in: "path"
+      description: "Application sequence number"
+      example: "6745122"
+      required: true
+      schema:
+        type: integer
+    applSeqNumFilter:
+          name: "ApplSeqNum"
+          in: query
+          description: >
+            Filter by application sequence number.<br/>
+            (Multiple values must be separated by comma)
+          example: 6745122
+          required: false
+          schema:
+            type: integer
+    date:
+      name: "date"
+      in: "path"
+      description: "Trading day in the format  YYYYMMDD"
+      example: 20200106
+      required: true
+      schema:
+        type: "integer"
+    from:
+      name: "from"
+      in: "query"
+      description: >
+        Starting time for the time interval filter.<br/>
+        Format: Nanoseconds since 1970 (EOBI TransactTime)
+      example: "1589175000156121100"
+      required: false
+      schema:
+        type: string
+    limit:
+      name: "limit"
+      in: "query"
+      description: "Max number of elements in the response."
+      required: false
+      schema:
+        type: integer
+        example: 100
+        default: No restriction
+    marketId:
+      name: "marketId"
+      in: "path"
+      description: "Market identifier code as specified in ISO 10383."
+      example: "XEUR"
+      required: true
+      schema:
+        type: "string"
+    marketSegmentId:
+      name: "marketSegmentId"
+      in: "path"
+      description: "Unique product identifier or product pool identifier on T7"
+      example: 1210
+      required: true
+      schema:
+        type: integer
+    mode:
+      in: "query"
+      name: "mode"
+      description: >
+        Define the output format for the response.<br/>
+        Mode options:
+          * `reference` (default) - Shows a list of the referencing IDs
+          * `detailed` - Shows a list of messages including their details
+      required: false
+      schema:
+        type: "string"
+        enum: [reference,detailed]
+    msgSeqNum:
+      name: "msgSeqNum"
+      in: "path"
+      description: "Message sequence number."
+      example: "4294967295"
+      required: true
+      schema:
+        type: integer
+    msgSeqNumFilter:
+          name: "MsgSeqNum"
+          in: query
+          description: >
+            Filter by message sequence number.<br/>
+            (Multiple values must be separated by comma)
+          example: 4294967295
+          required: false
+          schema:
+            type: integer
+    securityId:
+      name: "securityId"
+      in: "path"
+      description: "Unique security identifier on T7"
+      example: 27299
+      required: true
+      schema:
+        type: integer
+    templateId:
+      name: "templateId"
+      in: "query"
+      description: "Filter by template identifier. Multiple values have to be separeted by comma."
+      example: 13101
+      required: false
+      schema:
+        type: integer
+    templateIdFilter:
+          name: "TemplateId"
+          in: query
+          description: >
+            Filter by template identifier.<br/>
+            (Multiple values must be separated by comma)
+          example: 13101
+          required: false
+          schema:
+            type: integer
+    to:
+      name: "to"
+      in: "query"
+      description: >
+        Ending time for the time interval filter.<br/>
+        Format: Nanoseconds since 1970 (EOBI TransactTime)
+      example: "1589175000156121100"
+      required: false
+      schema:
+        type: string
+    transactTime:
+      name: "transactTime"
+      in: "path"
+      description: "Transaction time as nanoseconds since 1970"
+      example: "1589175000156121100"
+      required: true
+      schema:
+        type: string
+        format: UTCTimestamp 
+        
+  schemas:
+    ApplSeqNums:
+      properties:
+        ApplSeqNums:
+          type: array
+          items:
+            type: integer
+          example:
+            - 6745122
+            - 5468432
+    Dates:
+      properties:
+        Dates:
+          type: array
+          items:
+            type: integer
+          example:
+            - 20200102
+            - 20200103
+            - 20200106
+    InternalError:
+      properties:
+        success:
+          type: string
+          example: "false"
+        message:
+          type: string
+          example: "Error message"
+      required:
+        - success
+        - message
+    MarketIDs:
+      properties:
+        MarketIDs:
+          type: array
+          items:
+            type: string
+          example:
+            - "XETR"
+            - "XEUR"
+    MarketSegmentIDs:
+      properties:
+        MarketSegmentIDs:
+          type: array
+          items:
+            type: integer
+          example:
+            - 589
+            - 675
+            - 1210
+    Messages:
+      properties:
+        Messages:
+          type: array
+          items:
+            type: object
+          example:
+            - MessageHeader: 
+                BodyLen: 32
+                TemplateID: 13301
+                MsgSeqNum: 27
+              ApplSeqNum: 6745122
+              SecurityID: 4233128
+              SecurityStatus: 1
+              SecurityTradingStatus: 204
+              MarketCondition: 0
+              FastMarketIndicator: 0
+              SecurityTradingEvent: null
+              SoldOutIndicator: null
+              TransactTime: "1589180100007258166"
+    MessageDetails:
+      properties:
+        MessageDetails:
+          type: object
+          example:
+            MessageHeader: 
+              BodyLen: 32
+              TemplateID: 13301
+              MsgSeqNum: 27
+            ApplSeqNum: 6745122
+            SecurityID: 4233128
+            SecurityStatus: 1
+            SecurityTradingStatus: 204
+            MarketCondition: 0
+            FastMarketIndicator: 0
+            SecurityTradingEvent: null
+            SoldOutIndicator: null
+            TransactTime: "1589180100007258166"
+          description: >
+            Please see the T7 EOBI documentation for a detailed description of the supported message types.<br/>
+            The following message types are supported by the API:
+              *  MarketDataOrder (U21)
+              *  MarketDataTrade (U22)
+              *  MarketDataInstrument (U23)
+              *  TradingSessionStatus (h)
+              *  SecurityMassStatus (CO)
+              *  SecurityStatus (f)
+              *  SecurityDefinitionUpdateReport (BP)  
+    MsgSeqNums:
+      properties:
+        MsgSeqNums:
+          type: array
+          items:
+            type: integer
+          example:
+            - 4294967295
+            - 3224966211
+    Packets:
+      properties:
+        Packets:
+          type: array
+          items:
+            type: object
+          example:
+            - MessageHeader: 
+                BodyLen: 32
+                TemplateID: 13301
+                MsgSeqNum: 27
+              ApplSeqNum: 6745122
+              SecurityID: 4233128
+              SecurityStatus: 1
+              SecurityTradingStatus: 204
+              MarketCondition: 0
+              FastMarketIndicator: 0
+              SecurityTradingEvent: null
+              SoldOutIndicator: null
+              TransactTime: "1589180100007258166"
+    SecurityIDs:
+      properties:
+        SecurityIDs:
+          type: array
+          items:
+            type: integer
+          example:
+            - "2786758"
+            - "3593999"
+            - "4005044"
+    TransactTimes:
+      properties:
+        TransactTimes:
+          type: array
+          items:
+            type: string
+            format: UTCTimestamp
+          example:
+            - "1589175000156121100"
+            - "1589180100007332308"
+            - "1589180400061095876"
+            - "1589211910025122757"
+  responses:
+
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    404:
+      description: Not found
+
+            
+security:
+  - bearerAuth: []

@@ -1,0 +1,416 @@
+openapi: 3.0.0
+info:
+  title: A7 Analytics Platform - Market data insights API
+  description: >
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data (EOBI)
+    across all T7 exchanges (Eurex, Xetra, etc.).<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via  RESTful API.</br></br>
+    The Market data insights API offers a deeper insight into the T7 market data and provides read-only access to pre-defined benchmarks. It comprises the following components:
+      - <b>Pace of the Roll</b> provides access to metrics based on open interest information and T7 market data to enable clients to find the best roll for a specific market segment.
+      - <b>Latency histogram</b> visualizes the distribution of market participants' reaction times based on HPT timestamps. Measured from when a market data update for product A leaves Deutsche Börse's network (t_9d), how many requests for product B reach the outer layer of the network (t_3a) within an interval afterwards? Two intervals are available: one covering the fastest reaction times (up to 500 ns wire-to-wire latency, 1 ns resolution), the other covering wire-to-wire latencies up to 50 μs (100 ns resolution). Selection of thee trigger & target products, interval, and the type of trigger is provided.
+    
+    All available endpoints are described in detail below.<br/><br/>
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.1
+servers:
+  - url: /api/v1
+    description: A7 production environment
+    
+paths:
+  /insights/por:
+    get:
+      tags:
+        - Pace of the Roll
+      summary: Retrieve list of market segments
+      description: The request delivers all available market segments as a list of strings.
+      operationId: getMarketSegments
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  MarketSegments:
+                    type: array
+                    items:
+                     $ref: '#/components/schemas/MarketSegment'
+                required: [MarketSegments]
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+  /insights/por/{MarketSegment}:
+    get:
+      tags:
+        - Pace of the Roll
+      summary: Retrieve list of rolls
+      description: The request delivers all available rolls for the selected market segment as a list of dates (format =  YYYYMM).
+      operationId: getRolls
+      parameters:
+        - $ref: '#/components/parameters/MarketSegment'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Rolls:
+                    type: array
+                    items:
+                     $ref: '#/components/schemas/Roll'
+                required: [Rolls]
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+  /insights/por/{MarketSegment}/{Roll}:
+    get:
+      tags:
+        - Pace of the Roll
+      summary: Retrieve roll details
+      description: >
+        The request delivers the detailes for the selected roll as a JSON object.<br><br> 
+        The details contain the current `r_0`, previous `r_1` and the one before the previous roll `r_2` as well as other previous rolls upto `n` (`r_3`, ..., `r_n`). The roll is defined as a ratio of adjusted open interest of a back-month contract to a sum of back- and front-month contract, for example Dec-2012 / (Sep-2012 + Dec-2012) for September 2012 roll. For each roll this ratio is calculated for a given number of days till expiry (`days`). The corresponding number of days till expiry `dte` is also provided in the output. Additionally, six quantiles (`q_0 = min`, `q_1 = 10%`, `q_2 = 25%`, `q_3 = 75%`, `q_4 = 90%`, `q_5 = max`) based on `n` previous rolls. In the selection of past rolls two alternative comparison methods can be used: consecutive (`comp=c`, i.e. Jun-2012, Mar-2012, Dec-2011, Sep-2011 etc. for Sep-2012 roll) or the same month (`comp=s`, i.e. Sep-2011, Sep-2010, Sep-2009, Sep-2008 for Sep-2012 roll).<br><br>
+        Quantile `q` is the value of the largest `m`-th element such that `m / n <= q`, where `n` is the number of elements in an ordered list (in other words, `int index = q(double) * (n(int) - 1)`, where `index` is 0-based index of an element in an sorted list).
+
+          <b>Example:</b> `n = 30`:
+
+          `q_0 = min`: `m = 1` (`index = 0`, always the 1st element)
+          
+          `q_1 = 10%`: `m = 3` (`index = 2`, the 3rd element)
+          
+          `q_2 = 25%`: `m = 8` (`index = 7`, the 8th element)
+          
+          `q_3 = 75%`: `m = 22` (`index = 21`, the 22rd element)
+          
+          `q_4 = 90%`: `m = 27` (`index = 26`, the 27th element)
+          
+          `q_5 = max`: `m = n = 30` (`index = 29`, always the last element)
+        
+        
+      operationId: "getRollDetails"
+      parameters:
+        - $ref: "#/components/parameters/MarketSegment"
+        - $ref: "#/components/parameters/Roll"
+        - $ref: "#/components/parameters/days"
+        - $ref: "#/components/parameters/n"
+        - $ref: "#/components/parameters/comp"        
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RollDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /insights/latencies/{date}/{trigger}/{target}/{regime}/{target_action}:
+    get:
+      tags:
+        - "Latency Historgram"
+      summary: Retrieve result of given latencies query
+      description: The request queries the latencies and returns the matching results.
+      operationId: queryInsights
+      parameters:
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/trigger"
+        - $ref: "#/components/parameters/target"
+        - $ref: "#/components/parameters/regime"
+        - $ref: "#/components/parameters/target_action"
+        - $ref: "#/components/parameters/format"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LatenciesInsightsResultsJson"
+            text/csv:
+              schema:
+                $ref: "#/components/schemas/LatenciesInsightsResultsCsv"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+        "503":
+          $ref: "#/components/responses/503"
+components:
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    MarketSegment:
+      name: MarketSegment
+      in: path
+      description: Name of the market segment
+      example: FDAX
+      required: true
+      schema:
+        $ref: '#/components/schemas/MarketSegment'
+    Roll:
+      name: Roll
+      in: path
+      description: Roll in the format YYYYMM
+      example: 202103
+      required: true
+      schema:
+        $ref: '#/components/schemas/Roll'
+    days:
+      name: "days"
+      in: query
+      description: "Number of days till expiry including the expiry day"
+      example: 15
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 31
+        default: 10
+    n:
+      name: "n"
+      in: query
+      description: "Maximal number of previous rolls for quantile calculation"
+      example: 20
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 99
+        default: 30
+    comp:
+      name: "comp"
+      in: query
+      description: >
+        Comparison parameter to control which past rolls are considered for the calculation.
+        <br>
+          * `s` = Data from the same expiration month from previous years
+          * `c` = Data from `n` consecutive months prior to the selected roll
+      required: false
+      schema:
+        type: string
+        default: c
+        enum: [c,s]
+    date:
+      name: date
+      in: path
+      description: Date (fact date) of the data to be retrieved (as YYYYMMDD)
+      example: 20220121
+      required: true
+      schema:
+        type: string
+        pattern: '^20\d{2}[01]\d[0-3]\d$'
+    trigger:
+      name: trigger
+      in: path
+      description: Trigger product
+      example: FDAX
+      required: true
+      schema:
+        type: string
+    target:
+      name: target
+      in: path
+      description: Target product
+      example: FDAX
+      required: true
+      schema:
+        type: string
+    regime:
+      name: regime
+      in: path
+      description: Latency regime
+      required: true
+      schema:
+        type: string
+        enum: ["FPGA", "SOFTWARE"]
+        default: "FPGA"
+    target_action:
+      name: target_action
+      in: path
+      description: Target action
+      required: true
+      schema:
+        type: string
+        enum: ["TRADE", "BOOK", "ALL"]
+        default: "ALL"
+    format:
+      name: format
+      in: query
+      description: Defines the format of the response.
+      schema:
+        type: string
+        enum: ["csv", "json"]
+        default: "json"
+  schemas:
+    MarketSegment:
+      description: market segment represented by a product
+      type: string
+      example: FDAX
+    Roll:
+      description: roll represented by a date (format = YYYYMM)
+      type: integer
+      format: int32
+      pattern: '^\d{6}$'
+      example: 202103
+    Ratio:
+      description: ratio of adjusted open interest of a back-month contract to a sum of back- and front-month contract
+      type: number
+      format: float
+      nullable: true
+      minimum: 0
+      maximum: 1
+      example: 0.887223
+    RollDetails:
+      type: object
+      required: [dte, r_0, q_0, q_1, q_2, q_3, q_4, q_5]
+      properties:
+        dte:
+          description: days till expiry
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            example: 1
+        r_0:
+          description: current roll
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        r_1:
+          description: previous roll
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        r_2:
+          description: one before the previous roll
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        r_n:
+          description: n-th previous roll
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_0:
+          description: 0% quantile (minimum)
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_1:
+          description: 10% quantile
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_2:
+          description: 25% quantile
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_3:
+          description: 25% quantile
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_4:
+          description: 90% quantile
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+        q_5:
+          description: 100% quantile (maximum)
+          type: array
+          items:
+            $ref: '#/components/schemas/Ratio'
+    LatenciesInsightsResultsJson:
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+      example:
+        - {"Date": "20220201", "TriggerProduct": "FDAX", "TargetProduct": "FDAX", "LatencyRegime": "FPGA", "TargetAction": "TRADE", "Latency": "2712.0", "Count": "0"}
+        - {"Date": "20220201", "TriggerProduct": "FDAX", "TargetProduct": "FDAX", "LatencyRegime": "FPGA", "TargetAction": "TRADE", "Latency": "2713.0", "Count": "2"}
+        - {"Date": "20220201", "TriggerProduct": "FDAX", "TargetProduct": "FDAX", "LatencyRegime": "FPGA", "TargetAction": "TRADE", "Latency": "2714.0", "Count": "1"}
+        - {"Date": "20220201", "TriggerProduct": "FDAX", "TargetProduct": "FDAX", "LatencyRegime": "FPGA", "TargetAction": "TRADE", "Latency": "2715.0", "Count": "6"}
+    LatenciesInsightsResultsCsv:
+      type: string
+      example: >
+        Date,TriggerProduct,TargetProduct,LatencyRegime,TargetAction,Latency,Count
+        
+        20220201,FDAX,FDAX,FPGA,TRADE,2712.0,0
+        
+        20220201,FDAX,FDAX,FPGA,TRADE,2713.0,2
+        
+        20220201,FDAX,FDAX,FPGA,TRADE,2714.0,1
+        
+        20220201,FDAX,FDAX,FPGA,TRADE,2715.0,6
+  responses:
+    400:
+      description: Bad request
+      content:
+        text/plain:
+          schema:
+            type: string
+          example:
+            "Bad request."
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string
+          example:
+            "Authorization error message."
+    404:
+      description: Not found
+      content:
+        text/plain:
+          schema:
+            type: string
+          example:
+            "Not found."
+    500:
+      description: Internal processing error
+      content:
+        text/plain:
+          schema:
+            type: string
+          example:
+            "Internal processing error."
+    503:
+      description: Service temporarily unavailable
+      content:
+        text/plain:
+          schema:
+            type: string
+          example:
+            "Service temporarily unavailable."
+security:
+  - bearerAuth: []

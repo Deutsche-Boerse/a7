@@ -1,0 +1,926 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - Reference data API (RDI) version 2
+  description: |
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data (EOBI)
+    across all T7 exchanges (Eurex, Xetra, etc.).<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via  RESTful API.</br></br>
+    The reference data API provides access to the A7 (RDI) reference data for the available markets and trading days. All available endpoints are described in detail below.<br/><br/>
+    The following RDI messages can be accessed:
+      * ProductSnapshot (BU)
+      * InstrumentSnapshot (d)
+      * TotalReturnFutureStatus (f)
+      * TradeAtReferencePriceStatus (f)
+      * VarianceFuturesStatus (f)
+    
+    In this documentation the different message types are not specified in full detail and only the general data types of the respective fields are described. For compatibility reasons fields of type signed/unsigned Int64 (e.g SecurityID) are returned as string. For the exact data types please refer to the T7 RDI documentation available at the [Xetra](https://www.xetra.com/xetra-en/technology/t7/system-documentation) or [Eurex](https://www.eurex.com/ex-en/support/initiatives) homepage.</br>
+    
+    Please be aware that depending on the date for which you are requesting data a different version of the T7 documentation has to be used.</br>
+    | Release | Valid from | Valid to  |
+    | ------- | -------- | -------- |
+    | T7 Release 7.0 | 03.12.2018 | 26.05.2019 |
+    | T7 Release 7.1 | 27.05.2019 | 17.11.2019 |
+    | T7 Release 8.0 | 18.11.2019 | 28.06.2020 |
+    | T7 Release 8.1 | 29.06.2020 | 22.11.2020 |
+    | T7 Release 9.0 | 23.11.2020 | 27.06.2021 |
+    | T7 Release 9.1 | 28.06.2021 | 21.11.2021 |
+    | T7 Release 10.0 | 22.11.2021 | 26.06.2022 |
+    | T7 Release 10.1 | 27.06.2022 | 20.11.2022 |
+    | T7 Release 11.0 | 21.11.2022 | 22.05.2023 |
+    | T7 Release 11.1 | 23.05.2023 | 19.11.2023 |
+    | T7 Release 12.0 | 20.11.2023 | 12.05.2024 |
+    | T7 Release 12.1 | 13.05.2024 | 17.11.2024 |
+    | T7 Release 13.0 | 18.11.2024 | 18.05.2025 |
+    | T7 Release 13.1 | 19.05.2025 | 09.11.2025 |
+    | T7 Release 14.0 | 10.11.2025 | present day |
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 2.0.0
+servers:
+  - url: /api/v2
+    description: A7 production environment
+    
+paths:
+  /rdi/:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve list of markets"
+      description: "The request delivers all available markets as a list of marketIds."
+      operationId: "getMarkets"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Markets"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"          
+        "404":
+          $ref: "#/components/responses/404"
+
+  /rdi/{marketId}/:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve list of trading days"
+      description: "The request delivers all available trading days for the selected market as a list of dates."
+      operationId: "getDates"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dates"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /rdi/{marketId}/{date}/:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve list of market segments"
+      description: "The request delivers all available market segments for the selected market and trading day as a list of marketSegmentIds."
+      operationId: "getMarketSegments"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketSegments"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /rdi/{marketId}/{date}:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve details for all market segments"
+      description: "The request delivers details for all available market segments for the selected market and trading day as a list of objects. The details contain all available ProductSnapshot (BU) messages."
+      operationId: "getMarketSegmentOverview"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketSegmentsOverview"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /rdi/{marketId}/{date}/{marketSegmentId}/:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve list of securities"
+      description: "The request delivers all available securities for the selected market, trading day and market segment as a list securityIds."
+      operationId: "getSecurities"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Securities"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /rdi/{marketId}/{date}/{marketSegmentId}:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve market segment details"
+      description: "The request delivers all available details for the selected market segment as a list of objects. The details contain all RDI messages connected to the market segment. The message types ProductSnapshot (BU), InstrumentSnapshot (d), TotalReturnFutureStatus (f), TradeAtReferencePriceStatus (f) and VarianceFuturesStatus (f) can be expected."
+      operationId: "getMarketSegmentDetails"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketSegmentDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+  
+  /rdi/{marketId}/{date}/{marketSegmentId}/{securityId}/:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve list of messages"
+      description: "The request delivers all available messages for the selected market, trading day, market segment and security as a list of msgSeqNums."
+      operationId: "getMessages"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Messages"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /rdi/{marketId}/{date}/{marketSegmentId}/{securityId}:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve security details"
+      description: "The request delivers all available details for the selected market segment and security as a list of objects. The details contain all RDI messages connected to the market segment and security. The message types  InstrumentSnapshot (d), TotalReturnFutureStatus (f), TradeAtReferencePriceStatus (f) and VarianceFuturesStatus (f) can be expected."
+      operationId: "getSecurityDetails"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /rdi/{marketId}/{date}/{marketSegmentId}/{securityId}/{msgSeqNum}:
+    get:
+      tags:
+        - "Reference data API"
+      summary: "Retrieve message details"
+      description: "The request delivers the message details for the selected market, trading day, market segment, security and message as an array of  objects. Depending on the type of message, the content of the objects may differ. The message types InstrumentSnapshot (d), TotalReturnFutureStatus (f), TradeAtReferencePriceStatus (f) and VarianceFuturesStatus (f) can be expected."
+      operationId: "getMessageDetails"
+      parameters:
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/msgSeqNum"        
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageDetails"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+
+components:
+
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    Dates:
+      type: array
+      items:
+        type: integer
+        format: uint32
+      example:
+        - 20200102
+        - 20200103
+        - 20200106
+        
+    InstrumentSnapshot:
+      type: object
+      description: "InstrumentSnapshot (d) message details. Please refer the T7 RDI documentation for details about the available fields for the different message types."
+      example:
+        Template: InstrumentSnapshot
+        MsgType: d
+        MsgSeqNum: 1914
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        NoSecurityAltID: 2
+        SecurityAlt:
+          - SecurityAltID: '365625353'
+            SecurityAltIDSource: M
+          - SecurityAltID: DE000C47BX29
+            SecurityAltIDSource: '4'
+        SecurityType: TRF
+        SecurityStatus: '1'
+        SecurityDesc: TC1L SI 20210319 CS
+        ProductComplex: '1'
+        DerivativesDescriptorGroup:
+          CFICode: FFICSX
+          SimpleInstrumentDescriptorGroup:
+            ContractDate: 20210319
+            ContractMonthYear: 202103
+            ContractMultiplier: 1
+            ValuationMethod: FUT
+            SettlMethod: C
+            PriorSettlPrice: 234.909
+        NoInstrAttrib: 5
+        InstrumentAttributes:
+          - InstrAttribType: '123'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '106'
+            InstrAttribValue: XEUR
+          - InstrAttribType: '112'
+            InstrAttribValue: 'Y'
+          - InstrAttribType: '113'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '115'
+            InstrAttribValue: 'N'
+        NoEvents: 1
+        Events:
+          - EventType: '7'
+            EventDate: 20210318
+        InstrumentPricePrecision: 4
+        MinPriceIncrement: 0.5
+        MinPriceIncrementClearing: 0.0002
+        MinPriceIncrementAmount: 0.01
+        MaturityDate: 20210319
+        MaturityMonthYear: 202103
+        NoMarketSegments: 1
+        MarketSegmentGrp:
+          - MarketSegmentID: 204934
+            PriceType: '22'
+            NoPriceRangeRules: 1
+            PriceRangeRules:
+              - PriceRangeRuleID: 489
+
+    Markets:
+      type: array
+      items:
+        type: string
+      example:
+        - "XEEE"
+        - "XETR"
+        - "XEUR"
+        
+    MarketSegments:
+      type: array
+      items:
+        type: integer
+        format: uint32
+      example:
+        - 3
+        - 4
+        - 8
+        - 9
+        - 10
+        
+    MarketSegmentDetails:
+      type: array
+      description: "An array of objects containing all messages connected to the security."
+      items:
+        type: object
+        description: "Message object of type ProductSnapshot (BU), InstrumentSnapshot (d) or SecurityStatus (f). Please refer to the T7 RDI documentation for details about the available fields for the different message types."
+      example: 
+      - Template: ProductSnapshot
+        MsgType: BU
+        MsgSeqNum: 1913
+        MarketID: XEUR
+        MarketSegmentID: 204934
+        EffectiveBusinessDate: 20210315
+        NextEffectiveBusinessDate: 20210316
+        MarketSegment: TC1L
+        MarketSegmentStatus: '1'
+        PartitionID: 6
+        DerivativesDescriptorGroup:
+          Currency: EUR
+          MarketSegmentDesc: TRF ON EURGP1LCOLL
+          MarketSegmentSymbol: DE000A26RR59
+          ParentMktSegmID: FINX
+          USApproval: None
+          OffsetSTPEffectiveTime: 10
+        UnderlyingDescriptorGroup:
+          UnderlyingSecurityExchange: XSTX
+          UnderlyingSymbol: 1CLE
+          UnderlyingSecurityID: CH0478459768
+          UnderlyingSecurityIDSource: '4'
+          UnderlyingPrevClosePx: 233.66
+        NoInstrumentScopes: 1
+        InstrumentScopes:
+          - InstrumentScopeOperator: '1'
+            InstrumentScopeSecurityType: TRF
+        BaseTrdgRules:
+          NoTickRules: 1
+          TickRules:
+            - TickRuleID: 13
+              StartTickPriceRange: 0
+              EndTickPriceRange: 9999999999.9999
+              TickIncrement: 0.5
+              NoTickRuleScopes: 1
+              TickRuleScopes:
+                - TickRuleProductComplex: '1'
+                  TrdType: '0'
+          NoPriceRangeRules: 1
+          PriceRangeRules:
+            - PriceRangeRuleID: 489
+              PriceRangeProductComplex: '1'
+              StartPriceRange: 0
+              EndPriceRange: 9999999999.9999
+              PriceRangeValue: 20
+          QuoteSideIndicator: '1'
+          QuoteSideModelType: '0'
+          FastMarketPercentage: 100
+        BaseTrdgRulesDerivatives:
+          NoQuoteSizeRules: 2
+          QuoteSizeRules:
+            - MinBidSize: 1
+              MinOfferSize: 1
+              FastMarketIndicator: '0'
+            - MinBidSize: 1
+              MinOfferSize: 1
+              FastMarketIndicator: '1'
+          NoFlexProductEligibilities: 0
+          FlexRules: []
+          RoundLot: 1
+        NoMatchRules: 1
+        MatchRules:
+          - MatchRuleProductComplex: '1'
+            MatchAlgorithm: PT
+        NoMDFeedTypes: 5
+        Feeds:
+          - MDFeedType: HS
+            MDBookType: '3'
+            PrimaryServiceLocationID: 224.0.114.42
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.114.74
+            SecondaryServiceLocationSubID: 59032
+          - MDFeedType: HI
+            MDBookType: '3'
+            MarketDepthTimeInterval: 0
+            PrimaryServiceLocationID: 224.0.114.43
+            PrimaryServiceLocationSubID: 59033
+            SecondaryServiceLocationID: 224.0.114.75
+            SecondaryServiceLocationSubID: 59033
+          - MDFeedType: HS
+            MDBookType: '2'
+            MarketDepth: 10
+            MDRecoveryTimeInterval: 120000
+            PrimaryServiceLocationID: 224.0.50.14
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.50.142
+            SecondaryServiceLocationSubID: 59032
+          - MDFeedType: HI
+            MDBookType: '2'
+            MarketDepth: 10
+            MarketDepthTimeInterval: 0
+            PrimaryServiceLocationID: 224.0.50.15
+            PrimaryServiceLocationSubID: 59033
+            SecondaryServiceLocationID: 224.0.50.143
+            SecondaryServiceLocationSubID: 59033
+          - MDFeedType: L
+            MDBookType: '2'
+            MarketDepth: 5
+            MarketDepthTimeInterval: 2000
+            MDRecoveryTimeInterval: 300000
+            PrimaryServiceLocationID: 224.0.50.73
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.50.201
+            SecondaryServiceLocationSubID: 59032        
+      - Template: InstrumentSnapshot
+        MsgType: d
+        MsgSeqNum: 1914
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        NoSecurityAltID: 2
+        SecurityAlt:
+          - SecurityAltID: '365625353'
+            SecurityAltIDSource: M
+          - SecurityAltID: DE000C47BX29
+            SecurityAltIDSource: '4'
+        SecurityType: TRF
+        SecurityStatus: '1'
+        SecurityDesc: TC1L SI 20210319 CS
+        ProductComplex: '1'
+        DerivativesDescriptorGroup:
+          CFICode: FFICSX
+          SimpleInstrumentDescriptorGroup:
+            ContractDate: 20210319
+            ContractMonthYear: 202103
+            ContractMultiplier: 1
+            ValuationMethod: FUT
+            SettlMethod: C
+            PriorSettlPrice: 234.909
+        NoInstrAttrib: 5
+        InstrumentAttributes:
+          - InstrAttribType: '123'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '106'
+            InstrAttribValue: XEUR
+          - InstrAttribType: '112'
+            InstrAttribValue: 'Y'
+          - InstrAttribType: '113'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '115'
+            InstrAttribValue: 'N'
+        NoEvents: 1
+        Events:
+          - EventType: '7'
+            EventDate: 20210318
+        InstrumentPricePrecision: 4
+        MinPriceIncrement: 0.5
+        MinPriceIncrementClearing: 0.0002
+        MinPriceIncrementAmount: 0.01
+        MaturityDate: 20210319
+        MaturityMonthYear: 202103
+        NoMarketSegments: 1
+        MarketSegmentGrp:
+          - MarketSegmentID: 204934
+            PriceType: '22'
+            NoPriceRangeRules: 1
+            PriceRangeRules:
+              - PriceRangeRuleID: 489
+      - Template: TotalReturnFuturesStatus
+        MsgType: f
+        MsgSeqNum: 1915
+        MarketSegmentID: 204934
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        SecurityType: TRF
+        PriorSettlPrice: 159
+        NoClearingPriceParameters: 2
+        ClearingPriceParameters:
+          - BusinessDayType: '5'
+          - BusinessDayType: '1'
+            AnnualCalendarDays: 360
+            RemainingCalendarDays: 6
+
+    MarketSegmentsOverview:
+      type: array
+      description: "An array of objects containing all available ProductSnapshots (BU) message details."
+      items:
+        $ref: "#/components/schemas/ProductSnapshot"
+          
+    Messages:
+      type: array
+      items:
+        type: integer
+        format: uint32
+      example:
+        - 7474
+        - 7475
+        
+    MessageDetails:
+      type: array
+      description: "An array of objects."
+      items:
+        type: object
+        description: "Message object of type InstrumentSnapshot (d) or SecurityStatus (f). Please refer to the T7 RDI documentation for details about the available fields for the different message types."
+      example:
+      - Template: InstrumentSnapshot
+        MsgType: d
+        MsgSeqNum: 1914
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        NoSecurityAltID: 2
+        SecurityAlt:
+          - SecurityAltID: '365625353'
+            SecurityAltIDSource: M
+          - SecurityAltID: DE000C47BX29
+            SecurityAltIDSource: '4'
+        SecurityType: TRF
+        SecurityStatus: '1'
+        SecurityDesc: TC1L SI 20210319 CS
+        ProductComplex: '1'
+        DerivativesDescriptorGroup:
+          CFICode: FFICSX
+          SimpleInstrumentDescriptorGroup:
+            ContractDate: 20210319
+            ContractMonthYear: 202103
+            ContractMultiplier: 1
+            ValuationMethod: FUT
+            SettlMethod: C
+            PriorSettlPrice: 234.909
+        NoInstrAttrib: 5
+        InstrumentAttributes:
+          - InstrAttribType: '123'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '106'
+            InstrAttribValue: XEUR
+          - InstrAttribType: '112'
+            InstrAttribValue: 'Y'
+          - InstrAttribType: '113'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '115'
+            InstrAttribValue: 'N'
+        NoEvents: 1
+        Events:
+          - EventType: '7'
+            EventDate: 20210318
+        InstrumentPricePrecision: 4
+        MinPriceIncrement: 0.5
+        MinPriceIncrementClearing: 0.0002
+        MinPriceIncrementAmount: 0.01
+        MaturityDate: 20210319
+        MaturityMonthYear: 202103
+        NoMarketSegments: 1
+        MarketSegmentGrp:
+          - MarketSegmentID: 204934
+            PriceType: '22'
+            NoPriceRangeRules: 1
+            PriceRangeRules:
+              - PriceRangeRuleID: 489
+
+    ProductSnapshot:
+      type: object
+      description: "ProductSnapshot (BU) message details. Please see the T7 RDI documentation for details about the available fields for the different message types."
+      example:
+        Template: ProductSnapshot
+        MsgType: BU
+        MsgSeqNum: 1913
+        MarketID: XEUR
+        MarketSegmentID: 204934
+        EffectiveBusinessDate: 20210315
+        NextEffectiveBusinessDate: 20210316
+        MarketSegment: TC1L
+        MarketSegmentStatus: '1'
+        PartitionID: 6
+        DerivativesDescriptorGroup:
+          Currency: EUR
+          MarketSegmentDesc: TRF ON EURGP1LCOLL
+          MarketSegmentSymbol: DE000A26RR59
+          ParentMktSegmID: FINX
+          USApproval: None
+          OffsetSTPEffectiveTime: 10
+        UnderlyingDescriptorGroup:
+          UnderlyingSecurityExchange: XSTX
+          UnderlyingSymbol: 1CLE
+          UnderlyingSecurityID: CH0478459768
+          UnderlyingSecurityIDSource: '4'
+          UnderlyingPrevClosePx: 233.66
+        NoInstrumentScopes: 1
+        InstrumentScopes:
+          - InstrumentScopeOperator: '1'
+            InstrumentScopeSecurityType: TRF
+        BaseTrdgRules:
+          NoTickRules: 1
+          TickRules:
+            - TickRuleID: 13
+              StartTickPriceRange: 0
+              EndTickPriceRange: 9999999999.9999
+              TickIncrement: 0.5
+              NoTickRuleScopes: 1
+              TickRuleScopes:
+                - TickRuleProductComplex: '1'
+                  TrdType: '0'
+          NoPriceRangeRules: 1
+          PriceRangeRules:
+            - PriceRangeRuleID: 489
+              PriceRangeProductComplex: '1'
+              StartPriceRange: 0
+              EndPriceRange: 9999999999.9999
+              PriceRangeValue: 20
+          QuoteSideIndicator: '1'
+          QuoteSideModelType: '0'
+          FastMarketPercentage: 100
+        BaseTrdgRulesDerivatives:
+          NoQuoteSizeRules: 2
+          QuoteSizeRules:
+            - MinBidSize: 1
+              MinOfferSize: 1
+              FastMarketIndicator: '0'
+            - MinBidSize: 1
+              MinOfferSize: 1
+              FastMarketIndicator: '1'
+          NoFlexProductEligibilities: 0
+          FlexRules: []
+          RoundLot: 1
+        NoMatchRules: 1
+        MatchRules:
+          - MatchRuleProductComplex: '1'
+            MatchAlgorithm: PT
+        NoMDFeedTypes: 5
+        Feeds:
+          - MDFeedType: HS
+            MDBookType: '3'
+            PrimaryServiceLocationID: 224.0.114.42
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.114.74
+            SecondaryServiceLocationSubID: 59032
+          - MDFeedType: HI
+            MDBookType: '3'
+            MarketDepthTimeInterval: 0
+            PrimaryServiceLocationID: 224.0.114.43
+            PrimaryServiceLocationSubID: 59033
+            SecondaryServiceLocationID: 224.0.114.75
+            SecondaryServiceLocationSubID: 59033
+          - MDFeedType: HS
+            MDBookType: '2'
+            MarketDepth: 10
+            MDRecoveryTimeInterval: 120000
+            PrimaryServiceLocationID: 224.0.50.14
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.50.142
+            SecondaryServiceLocationSubID: 59032
+          - MDFeedType: HI
+            MDBookType: '2'
+            MarketDepth: 10
+            MarketDepthTimeInterval: 0
+            PrimaryServiceLocationID: 224.0.50.15
+            PrimaryServiceLocationSubID: 59033
+            SecondaryServiceLocationID: 224.0.50.143
+            SecondaryServiceLocationSubID: 59033
+          - MDFeedType: L
+            MDBookType: '2'
+            MarketDepth: 5
+            MarketDepthTimeInterval: 2000
+            MDRecoveryTimeInterval: 300000
+            PrimaryServiceLocationID: 224.0.50.73
+            PrimaryServiceLocationSubID: 59032
+            SecondaryServiceLocationID: 224.0.50.201
+            SecondaryServiceLocationSubID: 59032
+    Securities:
+      type: array
+      items:
+        type: string
+        format: int64
+      example:
+        - "4799382"
+        - "5036064"
+        - "5141210"
+        - "5222340"
+        - "5336489"
+        - "5428018"
+        - "5519919"
+        - "5594891"
+        - "5694799"
+        - "3595763"
+        - "5914234"
+        - "6014211"
+        - "6119243"
+        - "4557556"
+        - "5824719"
+        - "72057611217797215"
+
+    SecurityDetails:
+      type: array
+      description: "An array of objects containing all messages connected to the security."
+      items:
+        type: object
+        description: "Message object of type InstrumentSnapshot (d) or SecurityStatus (f). Please refer to the T7 RDI documentation for details about the available fields for the different message types."
+      example:
+      - Template: InstrumentSnapshot
+        MsgType: d
+        MsgSeqNum: 1914
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        NoSecurityAltID: 2
+        SecurityAlt:
+          - SecurityAltID: '365625353'
+            SecurityAltIDSource: M
+          - SecurityAltID: DE000C47BX29
+            SecurityAltIDSource: '4'
+        SecurityType: TRF
+        SecurityStatus: '1'
+        SecurityDesc: TC1L SI 20210319 CS
+        ProductComplex: '1'
+        DerivativesDescriptorGroup:
+          CFICode: FFICSX
+          SimpleInstrumentDescriptorGroup:
+            ContractDate: 20210319
+            ContractMonthYear: 202103
+            ContractMultiplier: 1
+            ValuationMethod: FUT
+            SettlMethod: C
+            PriorSettlPrice: 234.909
+        NoInstrAttrib: 5
+        InstrumentAttributes:
+          - InstrAttribType: '123'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '106'
+            InstrAttribValue: XEUR
+          - InstrAttribType: '112'
+            InstrAttribValue: 'Y'
+          - InstrAttribType: '113'
+            InstrAttribValue: 'N'
+          - InstrAttribType: '115'
+            InstrAttribValue: 'N'
+        NoEvents: 1
+        Events:
+          - EventType: '7'
+            EventDate: 20210318
+        InstrumentPricePrecision: 4
+        MinPriceIncrement: 0.5
+        MinPriceIncrementClearing: 0.0002
+        MinPriceIncrementAmount: 0.01
+        MaturityDate: 20210319
+        MaturityMonthYear: 202103
+        NoMarketSegments: 1
+        MarketSegmentGrp:
+          - MarketSegmentID: 204934
+            PriceType: '22'
+            NoPriceRangeRules: 1
+            PriceRangeRules:
+              - PriceRangeRuleID: 489
+      - Template: TotalReturnFuturesStatus
+        MsgType: f
+        MsgSeqNum: 1915
+        MarketSegmentID: 204934
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        SecurityType: TRF
+        PriorSettlPrice: 159
+        NoClearingPriceParameters: 2
+        ClearingPriceParameters:
+          - BusinessDayType: '5'
+          - BusinessDayType: '1'
+            AnnualCalendarDays: 360
+            RemainingCalendarDays: 6
+
+    SecurityStatus:
+      type: object
+      description: "SecurityStatus (f) message details. Please see the T7 RDI documentation for details about the available fields for the different message types."
+      example:
+        Template: TotalReturnFuturesStatus
+        MsgType: f
+        MsgSeqNum: 1915
+        MarketSegmentID: 204934
+        SecurityID: '5036012'
+        SecurityIDSource: M
+        SecurityType: TRF
+        PriorSettlPrice: 159
+        NoClearingPriceParameters: 2
+        ClearingPriceParameters:
+          - BusinessDayType: '5'
+          - BusinessDayType: '1'
+            AnnualCalendarDays: 360
+            RemainingCalendarDays: 6
+
+    Error:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+
+  parameters:
+    marketId:
+      name: "marketId"
+      in: "path"
+      description: "Market identifier code as specified in ISO 10383. Available markets are XEEE, XETR and XEUR."
+      example: "XEUR"
+      required: true
+      schema:
+        type: "string"
+    date:
+      name: "date"
+      in: "path"
+      description: "Trading day in the format  YYYYMMDD"
+      example: 20200106
+      required: true
+      schema:
+        type: "integer"
+        format: uint32
+        pattern: '^\d{8}$'
+    marketSegmentId:
+      name: "marketSegmentId"
+      in: "path"
+      description: "Unique product identifier or product pool identifier on T7"
+      example: "204934"
+      required: true
+      schema:
+        type: integer
+        format: uint32
+    msgSeqNum:
+      name: "msgSeqNum"
+      in: "path"
+      description: "Message sequence number"
+      example: "4720"
+      required: true
+      schema:
+        type: integer
+        format: uint32
+    securityId:
+      name: "securityId"
+      in: "path"
+      description: "Unique security identifier on T7"
+      example: "5036012"
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  responses:
+    400:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    404:
+      description: Not found
+security:
+  - bearerAuth: []

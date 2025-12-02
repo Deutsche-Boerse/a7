@@ -1,0 +1,586 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - Order book API
+  description: |
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group and for the MDP feed of CME Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI, MDP) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data.<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via RESTful API.</br></br>
+    The order book API provides access to order books generated from the A7 (EOBI, MDP) market data. The API allows to access the order book valid at a specific time or a list of order books for a given time period. All available endpoints are described in detail below.<br/><br/>
+    In this documentation the different message types are not specified in full detail and only the general data types of the respective fields are described. For compatibility reasons fields of type signed/unsigned Int64 are returned as string. For the exact data types please refer to the T7 EOBI and CME MDP documentation available at the [Xetra](https://www.xetra.com/xetra-en/technology/t7/system-documentation), [Eurex](https://www.eurex.com/ex-en/support/initiatives) and [CME](https://www.cmegroup.com/confluence/display/EPICSANDBOX/CME+MDP+3.0+Market+Data) homepage.</br>
+    
+    Please be aware that depending on the date for which you are requesting data a different version of the T7 documentation has to be used.</br>
+    | Release | Valid from | Valid to  |
+    | ------- | -------- | -------- |
+    | T7 Release 7.0 | 03.12.2018 | 26.05.2019 |
+    | T7 Release 7.1 | 27.05.2019 | 17.11.2019 |
+    | T7 Release 8.0 | 18.11.2019 | 28.06.2020 |
+    | T7 Release 8.1 | 29.06.2020 | 22.11.2020 |
+    | T7 Release 9.0 | 23.11.2020 | 27.06.2021 |
+    | T7 Release 9.1 | 28.06.2021 | 21.11.2021 |
+    | T7 Release 10.0 | 22.11.2021 | 26.06.2022 |
+    | T7 Release 10.1 | 27.06.2022 | 20.11.2022 |
+    | T7 Release 11.0 | 21.11.2022 | 22.05.2023 |
+    | T7 Release 11.1 | 23.05.2023 | 19.11.2023 |
+    | T7 Release 12.0 | 20.11.2023 | 12.05.2024 |
+    | T7 Release 12.1 | 13.05.2024 | 17.11.2024 |
+    | T7 Release 13.0 | 18.11.2024 | 18.05.2025 |
+    | T7 Release 13.1 | 19.05.2025 | 09.11.2025 |
+    | T7 Release 14.0 | 10.11.2025 | present day |
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.1
+servers:
+  - url: /api/v1
+    description: A7 production environment
+
+paths:
+  /ob/{marketId}/{date}/{marketSegmentId}/{securityId}:
+    get:
+      tags:
+        - "Order book API"
+      summary: "Retrieve order books for T7"
+      description: >
+        The request delivers either the order book valid at a given time or a list of order books for a given time period.</br>
+        If `limit` is equal to `1`, the response will contain a single order book otherwise the response will contain a list of order books.</br>
+        If `from` query parameter is not provided, the first order book of the day will be returned.
+      operationId: "getOrderbookT7"
+      parameters: 
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/levels"
+        - $ref: "#/components/parameters/orderbook"
+        - $ref: "#/components/parameters/trades"
+        - $ref: "#/components/parameters/indicatives"    
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/T7Orderbook"
+                  - $ref: "#/components/schemas/T7Orderbooks"
+                  - $ref: "#/components/schemas/InternalError"
+              
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+  /ob/{exchange}/{date}/{asset}/{securityId}:
+    get:
+      tags:
+        - "Order book API"
+      summary: "Retrieve order books for CME"
+      description: >
+        The request delivers either the order book valid at a given time or a list of order books for a given time period.</br>
+        If `limit` is equal to `1`, the response will contain a single order book otherwise the response will contain a list of order books.</br>
+        If `from` query parameter is not provided, the first order book of the day will be returned.
+      operationId: "getOrderbookCME"
+      parameters: 
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/asset"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/levels"
+        - $ref: "#/components/parameters/orderbook"
+        - $ref: "#/components/parameters/trades"        
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/CMEOrderbook"
+                  - $ref: "#/components/schemas/CMEOrderbooks"
+                  - $ref: "#/components/schemas/InternalError"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"          
+components:
+
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+
+  parameters:
+    date:
+      name: "date"
+      in: "path"
+      description: "Trading day in the format  YYYYMMDD"
+      example: "20200106"
+      required: true
+      schema:
+        type: "string"
+        pattern: '^\d{8}$'
+    from:
+      name: "from"
+      in: "query"
+      description: >
+        Timestamp of when the order book was valid or starting time of the time interval.<br/>
+        Format: Nanoseconds since 1970 (EOBI TransactTime)
+      example: "1589175000156121100"
+      required: false
+      schema:
+        type: string
+        default: "0"
+    levels:
+      name: "levels"
+      in: "query"
+      description: "Define depth of the order book."
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+    limit:
+      name: "limit"
+      in: "query"
+      description: "Max number of elements in the response (Minimum = 1 / Maximum = 10000)."
+      required: false
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+        maximum: 10000
+    exchange:
+      name: "exchange"
+      in: "path"
+      description: "Exchange identifier code."
+      example: "XCME"
+      required: true
+      schema:
+        type: "string"        
+    marketId:
+      name: "marketId"
+      in: "path"
+      description: "Market identifier code as specified in ISO 10383."
+      example: "XEUR"
+      required: true
+      schema:
+        type: "string"
+    asset:
+      name: "asset"
+      in: "path"
+      description: "Unique product identifier or product pool identifier."
+      example: "GE"
+      required: true
+      schema:
+        type: "string"        
+    marketSegmentId:
+      name: "marketSegmentId"
+      in: "path"
+      description: "Unique product identifier or product pool identifier on T7."
+      example: "1210"
+      required: true
+      schema:
+        type: integer
+    orderbook:
+      name: "orderbook"
+      in: "query"
+      description: >
+        Define if orders should be shown or aggregated.</br>
+        Mode options:
+          * aggregated = Aggregate orders
+          * complete = Display orders
+      required: false
+      schema:
+        type: string
+        default: "aggregated"
+    securityId:
+      name: "securityId"
+      in: "path"
+      description: "Unique security identifier"
+      example: 27299
+      required: true
+      schema:
+        type: integer
+    to:
+      name: "to"
+      in: "query"
+      description: >
+        Ending time of the time interval.<br/>
+        Format: Nanoseconds since 1970 (EOBI TransactTime) 
+      example: "1589175000156121100"
+      required: false
+      schema:
+        type: string
+        default: "9999999999999999999"
+    trades:
+      name: "trades"
+      in: "query"
+      description: "Display trades."
+      required: false
+      schema:
+        type: boolean
+        default: false
+    indicatives:
+      name: "indicatives"
+      in: "query"
+      description: "Indicative auction uncrossing."
+      required: false
+      schema:
+        type: boolean
+        default: false
+        
+  schemas:
+    InternalError:
+      properties:
+        success:
+          type: string
+          example: "false"
+        message:
+          type: string
+          example: "Error message"
+      required:
+        - success
+        - message
+    T7Orderbook:
+      type: object
+      properties:
+        MarketId:
+          type: string
+          example: XEUR
+        MarketSegmentId:
+          type: integer
+          example: 3
+        SecurityId:
+          type: integer
+          example: 1552181
+        Timestamp:
+          type: string
+          format: UTCTimestamp
+          example: 1591599781302474758
+        prev:
+          type: string
+          format: UTCTimestamp
+          example: 1591599781297766655
+        next:
+          type: string
+          format: UTCTimestamp
+          example: 1591599781297766665
+        Buy:
+          type: array
+          items:
+            type: object
+            properties:
+              Price: 
+                type: string
+                example: 179000000
+              Quantity:
+                type: string
+                example: 210000
+              OrderCount:
+                type: integer
+                example: 2
+              Orders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TemplateID: 
+                      type: integer
+                      example: 13101
+                    MsgSeqNum: 
+                      type: integer
+                      example: 3964
+                    TrdRegTSTimeIn:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599781297741667
+                    TrdRegTSPrevTimePriority:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599727321193695
+                    PrevPrice:
+                      type: string
+                      example: 176000000
+                    PrevDisplayQty:
+                      type: string
+                      example: 100000
+                    TrdRegTSTimePriority:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599781297766655
+                    DisplayQty:
+                      type: integer
+                      example: 100000
+        Sell:
+          type: array
+          items:
+            type: object
+            properties:
+              Price: 
+                type: string
+                example: 246000000
+              Quantity:
+                type: string
+                example: 110000
+              OrderCount:
+                type: integer
+                example: 1
+              Orders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    TemplateID: 
+                      type: integer
+                      example: 13101
+                    MsgSeqNum: 
+                      type: integer
+                      example: 3965
+                    TrdRegTSTimeIn:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599781297741667
+                    TrdRegTSPrevTimePriority:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599727321193695
+                    PrevPrice:
+                      type: string
+                      example: 246000000
+                    PrevDisplayQty:
+                      type: string
+                      example: 100000
+                    TrdRegTSTimePriority:
+                      type: string
+                      format: UTCTimestamp
+                      example: 1591599781297766655
+                    DisplayQty:
+                      type: integer
+                      example: 100000
+        Trades:
+          type: array              
+          items:
+            type: object
+            properties:
+              TemplateID:
+                type: integer
+                example: 13105
+              MsgSeqNum:
+                type: integer
+                example: 393
+              Side:
+                type: string
+                example: SELL
+              AlgorithmicTradeIndicator:
+                type: integer
+                example: 1
+              TrdMatchID:
+                type: integer
+                example: 1136
+              Price:
+                type: string
+                example: 246000000
+              TrdRegTSTimePriority:
+                type: string
+                format: UTCTimestamp
+                example: 1591599727321193695
+              LastQty:
+                type: string
+                example: 3500000
+              LastPx: 
+                type: string
+                example: 246000000
+        Indicatives:
+          type: array
+          items:
+            type: object
+            properties:
+              TemplateID:
+                type: integer
+                example: 13501
+              MsgSeqNum:
+                type: integer
+                example: 393
+              LastQty:
+                type: string
+                example: 3500000
+              LastPx: 
+                type: string
+                example: 246000000
+              ImbalanceQty:
+                type: string
+                example: 3500000
+              ImbalanceSide:
+                type: string
+                example: BUY
+              SecurityTradingStatus:
+                type: string
+                example: 7
+              PotentialSecurityTradingEvent:
+                type: string
+                example: 0
+            required: [TemplateID,MsgSeqNum,LastPx]
+
+      required:
+        - MarketId
+        - MarketSegmentId
+        - SecurityId
+        - Timestamp
+    T7Orderbooks:
+      type: array
+      items:
+        $ref: "#/components/schemas/T7Orderbook"         
+    CMEOrderbook:
+      type: object
+      properties:
+        Exchange:
+          type: string
+          example: XCEC
+        Asset: 
+          type: string
+          example: HG
+        SecurityId:
+          type: integer
+          example: 14334
+        Timestamp:
+          type: string
+          format: UTCTimestamp
+          example: 1651010868506262487
+        prev:
+          type: string
+          format: UTCTimestamp
+          example: 1651010610978256347
+        next:
+          type: string
+          format: UTCTimestamp       
+          example: 1651010878790821909
+        Buy:
+          type: array
+          items:
+            type: object
+            properties:
+              Price: 
+                type: string
+                example: 45505000000000
+              Quantity:
+                type: string
+                example: 2
+              OrderCount:
+                type: integer
+                example: 1
+              Orders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    OrderID: 
+                      type: integer
+                      example: 766951730572
+                    MDOrderPriority: 
+                      type: integer
+                      example: 13109289399
+                    MDEntryPx:
+                      type: object
+                      properties:
+                        mantissa:
+                          type: integer
+                          example: 45505000000000
+                        exponent:
+                          type: integer
+                          example: -9
+                    MDDisplayQty:
+                      type: integer
+                      example: 2
+                    SecurityID:
+                      type: integer
+                      example: 14334  
+                    MDUpdateAction:
+                      type: string
+                      example: New
+                    MDEntryType:
+                      type: string
+                      example: Bid
+        Sell:
+          type: array
+          items:
+            type: object
+            properties:
+              Price: 
+                type: string
+                example: 45200000000000
+              Quantity:
+                type: string
+                example: 13
+              OrderCount:
+                type: integer
+                example: 1
+              Orders:
+                type: array
+                items:
+                  type: object  
+                  properties:
+                    OrderID: 
+                      type: integer
+                      example: 766858203326
+                    MDOrderPriority: 
+                      type: integer
+                      example: 13001112903
+                    MDEntryPx:
+                      type: object
+                      properties:
+                        mantissa:
+                          type: integer
+                          example: 45200000000000
+                        exponent:
+                          type: integer
+                          example: -9
+                    MDDisplayQty:
+                      type: integer
+                      example: 13
+                    SecurityID:
+                      type: integer
+                      example: 14334  
+                    MDUpdateAction:
+                      type: string
+                      example: New
+                    MDEntryType:
+                      type: string
+                      example: Ask
+        Trades:
+          type: array              
+          items:
+            type: object
+      required:
+        - Exchange
+        - Asset
+        - SecurityId
+        - Timestamp
+    CMEOrderbooks:
+      type: array
+      items:
+        $ref: "#/components/schemas/CMEOrderbook"   
+  responses:
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    404:
+      description: Not found
+            
+security:
+  - bearerAuth: []

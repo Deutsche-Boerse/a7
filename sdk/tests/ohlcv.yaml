@@ -1,0 +1,168 @@
+- title: Config
+  format: ALL
+  content: |-
+    MDA::Config {
+      "ohlcv",
+      "Calculates Open, High, Low, Close, and Volume (OHLCV) for on-book trades, aggregated into N-second intervals.",
+      { // Parameters
+        { "bin_size_sec", { "The aggregation interval in seconds. Must be >= 1.", MDA::Config::Parameter::Type::Int32, "60" } }
+      },
+      { // Result Sets
+        { "ohlcv", "Time-series of OHLCV bars.", MDA::Config::ResultSet::Type::Series,
+          {
+            { "ts", "Start timestamp of the bar (nanoseconds since epoch).", MDA::Config::Result::Type::Timestamp },
+            { "open", "Opening price of the bar.", MDA::Config::Result::Type::Double },
+            { "high", "Highest price of the bar.", MDA::Config::Result::Type::Double },
+            { "low", "Lowest price of the bar.", MDA::Config::Result::Type::Double },
+            { "close", "Closing price of the bar.", MDA::Config::Result::Type::Double },
+            { "volume", "Total traded volume in the bar.", MDA::Config::Result::Type::Double }
+          }
+        }
+      }
+    }
+
+- title: Context.h
+  format: ALL
+  content: |-
+    #pragma once
+    #include <eobi/EobiUtil.h>
+    #include <algorithm> // For std::min/max
+
+    /**
+     * @struct OHLVC_Bar
+     * @brief Holds the state for a single aggregation bar.
+     *        Using native EOBI tick types for price/qty avoids floating-point
+     *        errors during accumulation.
+     */
+    struct OHLVC_Bar {
+        Eobi::Price open = Eobi::NoPrice;
+        Eobi::Price high = Eobi::NoPrice;
+        Eobi::Price low = Eobi::NoPrice;
+        Eobi::Price close = Eobi::NoPrice;
+        Eobi::Quantity volume = 0;
+
+        // Resets the bar to its initial state.
+        void reset() {
+            open = Eobi::NoPrice;
+            high = Eobi::NoPrice;
+            low = Eobi::NoPrice;
+            close = Eobi::NoPrice;
+            volume = 0;
+        }
+    };
+
+    /**
+     * @struct Context
+     * @brief Contains all persistent state for the algorithm.
+     */
+    struct Context {
+        // The aggregation interval, converted to nanoseconds.
+        uint64_t interval_ns = 60 * 1000000000ULL;
+
+        // The timestamp marking the START of the current aggregation bar.
+        Eobi::Timestamp current_bar_start_ts = 0;
+        
+        // The accumulator for the current, active bar.
+        OHLVC_Bar current_bar;
+    };
+
+- title: onSetParameter
+  format: ALL
+  content: |-
+    // This handler validates and sets the aggregation interval from user parameters.
+    auto it_param = params.find("bin_size_sec");
+    if (it_param != params.end()) {
+        try {
+            int64_t bin_size = std::stoll(it_param->second);
+            // Ensure the interval is at least 1 second.
+            if (bin_size < 1) {
+                bin_size = 1;
+            }
+            context.interval_ns = bin_size * 1000000000ULL;
+        } catch (const std::exception& e) {
+            // Parameter is not a valid number, ignore and use the default value.
+        }
+    }
+    return true;
+
+- title: onStartInstrument
+  format: T7
+  content: |-
+    // This handler is called once before processing data for an instrument.
+    // It's crucial to reset all state to ensure a clean run.
+    context.current_bar_start_ts = 0;
+    context.current_bar.reset();
+    return true;
+
+- title: onTradeReportT
+  format: T7
+  content: |-
+    // This is the core logic, executed for every on-book trade report.
+    const Eobi::Timestamp trade_ts = obj.TransactTime;
+    const Eobi::Price trade_price = obj.LastPx;
+    const Eobi::Quantity trade_qty = obj.LastQty;
+
+    // Ignore trades with no valid price or non-positive quantity.
+    if (trade_price == Eobi::NoPrice || trade_qty <= 0) {
+        return true;
+    }
+
+    // Initialize the first bar's start time on the very first trade.
+    if (context.current_bar_start_ts == 0) {
+        context.current_bar_start_ts = (trade_ts / context.interval_ns) * context.interval_ns;
+    }
+
+    // Check if the current trade belongs to a new bar. This is the "bar rollover" logic.
+    if (trade_ts >= context.current_bar_start_ts + context.interval_ns) {
+        // The previous bar is complete. If it contained trades, output it.
+        if (context.current_bar.open != Eobi::NoPrice) {
+            addResultohlcv(
+                context.current_bar_start_ts,
+                static_cast<double>(context.current_bar.open) / Eobi::PRC_PRECISION,
+                static_cast<double>(context.current_bar.high) / Eobi::PRC_PRECISION,
+                static_cast<double>(context.current_bar.low) / Eobi::PRC_PRECISION,
+                static_cast<double>(context.current_bar.close) / Eobi::PRC_PRECISION,
+                static_cast<double>(context.current_bar.volume) / Eobi::QTY_PRECISION
+            );
+        }
+        
+        // Reset the accumulator and update the start time for the new bar.
+        context.current_bar.reset();
+        context.current_bar_start_ts = (trade_ts / context.interval_ns) * context.interval_ns;
+    }
+
+    // Aggregate the current trade's data into the active bar.
+    // If this is the first trade of the bar, it sets the open, high, and low prices.
+    if (context.current_bar.open == Eobi::NoPrice) {
+        context.current_bar.open = trade_price;
+        context.current_bar.high = trade_price;
+        context.current_bar.low = trade_price;
+    } else {
+        // Otherwise, just update high and low.
+        context.current_bar.high = std::max(context.current_bar.high, trade_price);
+        context.current_bar.low = std::min(context.current_bar.low, trade_price);
+    }
+
+    // The close price is always the price of the last trade seen in the bar.
+    context.current_bar.close = trade_price;
+    // Accumulate the volume.
+    context.current_bar.volume += trade_qty;
+
+    return true;
+
+- title: onCompleteInstrument
+  format: T7
+  content: |-
+    // This handler is called after the last message for the instrument is processed.
+    // Its purpose is to "flush" the final, partially-filled bar of data.
+    if (context.current_bar.open != Eobi::NoPrice) {
+        addResultohlcv(
+            context.current_bar_start_ts,
+            static_cast<double>(context.current_bar.open) / Eobi::PRC_PRECISION,
+            static_cast<double>(context.current_bar.high) / Eobi::PRC_PRECISION,
+            static_cast<double>(context.current_bar.low) / Eobi::PRC_PRECISION,
+            static_cast<double>(context.current_bar.close) / Eobi::PRC_PRECISION,
+            static_cast<double>(context.current_bar.volume) / Eobi::QTY_PRECISION
+        );
+    }
+    return true;

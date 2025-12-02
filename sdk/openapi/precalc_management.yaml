@@ -1,0 +1,955 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - Precalc API
+  description: >
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data (EOBI)
+    across all T7 exchanges (Eurex, Xetra, etc.).<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via RESTful API.
+      
+    The precalc API provides access to the A7 precalc jobs, tasks and result data. All available endpoints are described in detail below.<br/><br/>
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.1
+servers:
+  - url: /api/v1
+    description: A7 production environment
+
+paths:
+  /precalc:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve list of precalc owners"
+      description: "The request delivers a list of owners the user has permission to access."
+      operationId: "getOwners"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Owners'
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"  
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve list of precalc jobs"
+      description: "The request delivers all available precalcs jobs for the given owner."
+      operationId: "getPrecalcJobs"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Jobs"
+                  - $ref: "#/components/schemas/InternalError" 
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"          
+        "403":
+          $ref: "#/components/responses/403"  
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}/{precalc}:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve precalc job definition"
+      description: "The request delivers the definition for the given precalc job of the given owner."
+      operationId: "getPrecalcDef"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/JobDefinition'
+                  - $ref: "#/components/schemas/InternalError" 
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+    put:
+      tags:
+        - "Precalc API"
+      summary: "Create precalc job"
+      description: >
+        The request creates a new precalc job with the specified parameters.<br/>
+        Please be aware that updating existing precalc jobs is not possible. To update a job please delete the existing one first and then create it again.
+      operationId: "addPrecalcData"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      requestBody:
+        $ref: "#/components/requestBodies/putJobBody"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SuccessMessage'
+                  - $ref: "#/components/schemas/InternalError"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+    delete:
+      tags:
+        - "Precalc API"
+      summary: "Delete precalc job"
+      description: >
+        The request deletes the specified precalc job.<br/>
+        Please be aware that associated datasets are not delete automatically. The dataset API can be used to delete these datasets as well.
+      operationId: "delPrecalcData"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}/{precalc}/activate:
+    patch:
+      tags:
+        - "Precalc API"
+      summary: "Activate precalc job"
+      description: "The request activates the specified precalc job"
+      operationId: "activatePrecalc"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+  /precalc/{owner}/{precalc}/deactivate:
+    patch:
+      tags:
+        - "Precalc API"
+      summary: "Deactivate precalc job"
+      description: "The request deactivates the specified precalc job"
+      operationId: "deactivatePrecalc"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+                
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+
+  /precalc/{owner}/{precalc}/:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve dates for precalc job"
+      description: "The request delivers the available dates where tasks are available for the selected owner and precalc job"
+      operationId: "getPrecalcData"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Dates'
+                  - $ref: "#/components/schemas/InternalError"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}/{precalc}/{date}:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve tasks for precalc job"
+      description: "The request delivers the available tasks for the selected owner, precalc job and date"
+      operationId: "getTasks"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+        - $ref: "#/components/parameters/date"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Tasks'
+                  - $ref: "#/components/schemas/InternalError"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}/{precalc}/{date}/{task}:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve result-sets for task"
+      description: "The request delivers the available result-sets for the selected owner, precalc job, date and task"
+      operationId: "getResultSets"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/task"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Results'
+                  - $ref: "#/components/schemas/InternalError"                  
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /precalc/{owner}/{precalc}/{date}/{task}/{result}:
+    get:
+      tags:
+        - "Precalc API"
+      summary: "Retrieve data for result table"
+      description: "The request delivers the generated data for the selected owner, precalc job, date, task and result-set"
+      operationId: "getData"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/precalc"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/task"
+        - $ref: "#/components/parameters/result"
+        - $ref: "#/components/parameters/mode"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/DataJson'
+                  - $ref: '#/components/schemas/DataRaw'
+                  - $ref: "#/components/schemas/InternalError"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"  
+        "403":
+          $ref: "#/components/responses/403"
+        "404":
+          $ref: "#/components/responses/404"
+          
+components:
+
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+
+  requestBodies:
+    putJobBody:
+      description: "Precalc job definition"
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewPrecalc'
+
+  parameters:
+    date:
+      name: "date"
+      in: "path"
+      description: "Date in format YYYYMMDD"
+      example: 20200102
+      required: true
+      schema:
+        type: integer
+    owner:
+      name: "owner"
+      in: "path"
+      description: "User identifier code"
+      example: "Owner1"
+      required: true
+      schema:
+        type: "string"
+    precalc:
+      name: "precalc"
+      in: "path"
+      description: "Name of the precalc job"
+      example: "EUR_TRADES"
+      required: true
+      schema:
+        type: "string"
+    result:
+      name: "result"
+      in: "path"
+      description: "Name of the result table"
+      example: "EurexTrades"
+      required: true
+      schema:
+        type: "string"
+    task:
+      name: "task"
+      in: "path"
+      description: "Task number"
+      example: 1
+      required: true
+      schema:
+        type: "integer"
+    mode:
+      name: "mode"
+      in: "query"
+      description: > 
+        Defines the output format for the result data.<br/>
+        Mode options:
+          * `json` (default) - Returns the result data in json format
+          * `raw` - Returns the data as comma seperated list
+      schema:
+        type: string
+        enum: [json, raw]
+        
+  schemas:
+    DataJson:
+      properties:
+        Meta:
+          type: object
+          properties:
+            table_name:
+              type: string
+            partitioning_columns:
+              type: array
+              items:
+                type: string
+            columns:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  type: 
+                    type: string
+                  nullable: 
+                    type: boolean
+        Data:
+          type: array
+          items:
+            type: object
+      example:
+        meta:
+          table_name: price
+          partitioning_columns:
+            - day
+            - market
+            - marketsegmentid
+          columns:
+            - name: day
+              type: INT
+              nullable: false
+            - name: market
+              type: STRING
+              nullable: false
+            - name: marketsegmentid
+              type: INT
+              nullable: false
+            - name: open
+              type: DOUBLE
+              nullable: false
+            - name: high
+              type: DOUBLE
+              nullable: false
+            - name: low
+              type: DOUBLE
+              nullable: false
+            - name: close
+              type: DOUBLE
+              nullable: false
+        data:
+          - - 20201203
+            - XEUR
+            - 821
+            - 20.75
+            - 21.15
+            - 20.325
+            - 20.85
+          - - 20201203
+            - XEUR
+            - 821
+            - 20.75
+            - 21.725
+            - 20.325
+            - 21.6
+          - - 20201203
+            - XEUR
+            - 821
+            - 20.75
+            - 22.35
+            - 20.325
+            - 22.275
+    DataRaw:
+      type: string
+    Dates:
+      properties:
+        Dates:
+          type: array
+          items:
+            type: integer
+      example:
+        Dates:
+          - 20200104
+          - 20200103
+          - 20200102
+    InternalError:
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+      example:
+        success: false
+        message: "Specific error message"
+    SuccessMessage:
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - name
+        - message
+      example:
+        success: true
+        message: "Success message"
+    JobDefinition:
+      properties:
+        success:
+          type: string
+        name:
+          type: string
+        config:
+          type: array
+          items:
+            type: object
+            properties:
+              user:
+                type: string
+              name:
+                type: string
+              desc:
+                type: string
+              dateFrom:
+                type: integer
+              DateTo:
+                type: integer
+              data:
+                type: array
+                items:
+                  type: string
+              grouping:
+                type: array
+                items:
+                  type: string
+              algos:
+                type: array
+                items: 
+                  type: object
+                  properties:
+                    algo:
+                      type: string
+                    owner:
+                      type: string
+                    parameters:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          value:
+                            type: string
+                    schemas:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          table_name:
+                            type: string
+                          partitioning_columns:
+                            type: array
+                            items:
+                              type: string
+                          columns:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name: 
+                                  type: string
+                                type:
+                                  type: string
+                                nullable:
+                                  type: boolean
+                    assignments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          resultset:
+                            type: string
+                          tables:
+                            type: array
+                            items:
+                              type: string
+        state:
+          type: object
+      example:
+        success: true
+        name: traded_volume
+        config:
+          user: precalc
+          name: traded_volume
+          desc: Traded volume for XEUR, 515, 1168, 20201208
+          dateFrom: 20201208
+          dateTo: 20201208
+          data:
+            - market: XEUR
+              marketSegment: '515'
+            - market: XEUR
+              marketSegment: '1168'
+          grouping: None
+          algos:
+            - algo: traded_volume
+              owner: dbag
+              parameters:
+                - name: TimeBin
+                  value: '2'
+              schemas:
+                - table_name: message
+                  partitioning_columns:
+                    - day
+                    - market
+                    - marketSegmentID
+                  columns:
+                    - name: day
+                      type: INT
+                      nullable: false
+                    - name: market
+                      type: STRING
+                      nullable: false
+                    - name: marketSegmentID
+                      type: INT
+                      nullable: false
+                    - name: text
+                      type: String
+                      nullable: false
+                - table_name: ct
+                  partitioning_columns:
+                    - day
+                    - market
+                    - marketSegmentID
+                  columns:
+                    - name: day
+                      type: INT
+                      nullable: false
+                    - name: market
+                      type: STRING
+                      nullable: false
+                    - name: marketSegmentID
+                      type: INT
+                      nullable: false
+                    - name: time
+                      type: Timestamp
+                      nullable: false
+                    - name: volume
+                      type: Int64
+                      nullable: false
+                - table_name: a
+                  partitioning_columns:
+                    - day
+                    - market
+                    - marketSegmentID
+                  columns:
+                    - name: day
+                      type: INT
+                      nullable: false
+                    - name: market
+                      type: STRING
+                      nullable: false
+                    - name: marketSegmentID
+                      type: INT
+                      nullable: false
+                    - name: time
+                      type: Timestamp
+                      nullable: false
+                    - name: volume
+                      type: Int64
+                      nullable: false
+                - table_name: total
+                  partitioning_columns:
+                    - day
+                    - market
+                    - marketSegmentID
+                  columns:
+                    - name: day
+                      type: INT
+                      nullable: false
+                    - name: market
+                      type: STRING
+                      nullable: false
+                    - name: marketSegmentID
+                      type: INT
+                      nullable: false
+                    - name: volume
+                      type: Int64
+                      nullable: false
+              assignments:
+                - resultset: message
+                  tables:
+                    - message
+                - resultset: ct
+                  tables:
+                    - ct
+                - resultset: a
+                  tables:
+                    - a
+                - resultset: total
+                  tables:
+                    - total
+        state: {}
+    NewPrecalc:
+      properties:
+        name:
+          type: string
+        user:
+          type: string
+        dateFrom:
+          type: integer
+        dateTo:
+          type: integer
+        grouping:
+          type: string
+        data:
+          type: array
+          items:
+            type: string
+        algos:
+          type: array
+          items:
+            type: object
+            properties:
+              algo:
+                type: string
+              assignments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    resultset:
+                      type: string
+                    tables:
+                      type: array
+                      items:
+                        type: string
+              owner:
+                type: string
+              parameters:
+                type: array
+                items:
+                  type: object
+              schemas:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    columns: 
+                      type: array
+                      items: 
+                        type: object
+                        properties:
+                          name: 
+                            type: string
+                          nullable:
+                            type: boolean
+                          type:
+                            type: string
+                    partitioning:
+                      type: array
+                      items:
+                        type: string
+                    table_name:
+                      type: string
+      example:
+        name: XEUR_TOP-LEVEL
+        user: user01
+        dateFrom: 20210127
+        dateTo: 20210127
+        grouping: None
+        data:
+          - market: XEUR
+            marketSegment: '589'
+        algos:
+          - algo: top_level
+            assignments:
+              - resultset: bid
+                tables:
+                  - bid
+              - resultset: ask
+                tables:
+                  - ask
+              - resultset: count
+                tables:
+                  - count
+            owner: dbag
+            parameters: []
+            schemas:
+              - columns:
+                  - name: day
+                    nullable: false
+                    type: INT
+                  - name: market
+                    nullable: false
+                    type: STRING
+                  - name: marketsegmentid
+                    nullable: false
+                    type: INT
+                  - name: ts
+                    nullable: false
+                    type: Timestamp
+                  - name: price
+                    nullable: false
+                    type: Int64
+                partitioning_columns:
+                  - day
+                  - market
+                  - marketsegmentid
+                table_name: bid
+              - columns:
+                  - name: day
+                    nullable: false
+                    type: INT
+                  - name: market
+                    nullable: false
+                    type: STRING
+                  - name: marketsegmentid
+                    nullable: false
+                    type: INT
+                  - name: ts
+                    nullable: false
+                    type: Timestamp
+                  - name: price
+                    nullable: false
+                    type: Int64
+                partitioning_columns:
+                  - day
+                  - market
+                  - marketsegmentid
+                table_name: ask
+              - columns:
+                  - name: day
+                    nullable: false
+                    type: INT
+                  - name: market
+                    nullable: false
+                    type: STRING
+                  - name: marketsegmentid
+                    nullable: false
+                    type: INT
+                  - name: bid
+                    nullable: false
+                    type: Int64
+                  - name: ask
+                    nullable: false
+                    type: Int64
+                partitioning_columns:
+                  - day
+                  - market
+                  - marketsegmentid
+                table_name: count
+
+
+    Jobs:
+      properties:
+        Jobs:
+          type: array
+          items:
+            type: string 
+      example:
+        Jobs:
+          - EUR_TRADES
+          - EUR_TRADES_GBX
+          - ETR_BIDS
+          - ETR_ASKS
+    Owners:
+      properties:
+        Owners:
+          type: array
+          items:
+            type: string 
+      example:
+        Owners:
+          - DBAG
+          - Owner1
+          - Owner2    
+    Results:
+      properties:
+        Results:
+          type: array
+          items:
+            type: string 
+      example:
+        Jobs:
+          - EurexTrades
+          - EurexBids
+          - EurexAsks
+    Tasks:
+      properties:
+        Tasks:
+          type: array
+          items:
+            type: integer
+      example:
+        Tasks:
+          - 1
+          - 2
+          - 3
+          - 4
+          
+  responses:
+    400:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+            required:
+              - success
+              - message
+          example:
+            success: false
+            message: "Specific error message."
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    403:
+      description: Forbidden resource
+      content:
+        application/json:
+          schema:
+            properties:
+              success:
+                type: boolean
+              message:
+                type: string
+            required:
+              - success
+              - message
+          example:
+            success: false
+            message: "Specific error message."
+    404:
+      description: Could not find any record
+
+security:
+  - bearerAuth: []

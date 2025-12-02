@@ -1,0 +1,632 @@
+openapi: "3.0.0"
+info:
+  title: A7 Analytics Platform - Algo management API
+  description: >
+    A7 Analytics Platform for the main T7 trading venues of Deutsche Börse Group and for the MDP feed of CME Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (EOBI, MDP) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality, which is a flexible high-performance framework based on historical order book data.<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via RESTful API.</br></br>
+    
+    The algo management API provides access to the A7 algos and their results. With the API it is possible to create, update, delete and run algos and to access the results of the algo runs. All available endpoints are described in detail below.<br/><br/>
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+    
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.0.2
+servers:
+  - url: /api/v1
+    description: A7 production environment
+    
+paths:
+  /algo:
+    get:
+      tags:
+        - "Algo management API"
+      summary: "Retrieve list of algo owners"
+      description: "The request delivers a list of algo owners the current user has the permission to access."
+      operationId: "getOwners"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Owners"
+                  - $ref: "#/components/schemas/InternalError"                  
+              example:
+                Owners:
+                  - Owner1
+                  - Owner2
+                  - Owner3
+                  - Owner4
+
+                
+        "401":
+          $ref: "#/components/responses/401"          
+        "404":
+          $ref: "#/components/responses/404"
+
+  /algo/{owner}:
+    get:
+      tags:
+        - "Algo management API"
+      summary: "Retrieve list of available algos"
+      description: >
+        The request delivers all available algos for the selected customer as a list of strings.<br/>
+        Users are only able to access their own algos but not other users'.
+      operationId: "getAlgos"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - in: query
+          name: mode
+          description: >
+            Define the mode for the result output.
+            Mode options:
+              * `compact` - Shows only the names of the algos
+              * `detailed` - Shows all metadata of the algos
+          required: false
+          schema:
+            type: string
+            enum: [ compact, detailed]
+            example:
+              "compact"
+            default: "compact"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AlgosCompact"
+                  - $ref: '#/components/schemas/AlgosDetailed'
+                  - $ref: "#/components/schemas/InternalError"
+                example:
+                  Algos:
+                    - Algo1
+                    - Algo2
+                    - Algo3
+                    - Algo4
+                
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403"  
+        "404":
+          $ref: "#/components/responses/404"
+          
+  /algo/{owner}/{algoName}:
+    get:
+      tags:
+        - "Algo management API"
+      summary: "Retrieve algo configuration"
+      description: "The request delivers the configuration parameters of the selected algo."
+      operationId: "getAlgoMetadata"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/algoName"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AlgoConfiguration"
+                  - $ref: "#/components/schemas/InternalError"
+              example:
+                algo: Auction
+                owner: dbag
+                desc: During auction for a crossed order book the potential auction price and for an uncrossed order book the best bid and the best ask are displayed
+                params: []
+                results:
+                  - name: AuctionBestBid
+                    desc: AuctionBestBid
+                    type: Series
+                    fields:
+                      - name: ts
+                        desc: Event time stamp
+                        type: Timestamp
+                      - name: AuctionBestBid
+                        desc: Auction best offer as integer with 8 decimals
+                        type: Int64
+                  - name: AuctionBestOffer
+                    desc: AuctionBestOffer
+                    type: Series
+                    fields:
+                      - name: ts
+                        desc: Event time stamp
+                        type: Timestamp
+                      - name: AuctionBestOffer
+                        desc: Auction best offer as integer with 8 decimals
+                        type: Int64
+                  - name: AuctionClearingPrice
+                    desc: AuctionClearingPrice
+                    type: Series
+                    fields:
+                      - name: ts
+                        desc: Event time stamp
+                        type: Timestamp
+                      - name: AuctionClearingPrice
+                        desc: Auction clearing price as integer with 8 decimals
+                        type: Int64
+        "401":
+          $ref: "#/components/responses/401"          
+        "403":
+          $ref: "#/components/responses/403"  
+        "404":
+          $ref: "#/components/responses/404"
+    put:
+      tags:
+        - "Algo management API"
+      summary: "Create/update algo"
+      description:  >
+        The request creates a new algo with the specified parameters. If the algo already exists, an update is performed on the existing algo.<br/>
+        The algo content has to be added to the request body in yaml format.<br/> 
+        A detailed description about how to create algos and the required content can be found in the Algo Creation Manual.
+      operationId: "addAlgo"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/algoName"
+      requestBody:
+        $ref: "#/components/requestBodies/putAlgoBody"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                properties:
+                  algo:
+                    type: string
+                  owner:
+                    type: string
+                  success:
+                    type: boolean
+                  saved:
+                    type: boolean
+                  compiled:
+                    type: boolean
+                  runnable:
+                    type: boolean
+                  message:
+                    type: string
+                required:
+                  - success
+                  - message
+              example:
+                algo: spread
+                owner: user1
+                success: true
+                saved: true
+                compiled: true
+                runnable: true
+                message: algo compiled
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403" 
+        "404":
+          $ref: "#/components/responses/404"
+    delete:
+      tags:
+        - "Algo management API"
+      summary: "Delete algo"
+      description: "The request deletes the specified algo."
+      operationId: "deleteAlgo"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/algoName"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                properties:
+                  algo:
+                    type: string
+                  success:
+                    type: string
+                required:
+                  - algo
+                  - success
+              example:
+                algo: "Algo01"
+                success: "true"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          $ref: "#/components/responses/404"
+        "403":
+          $ref: "#/components/responses/403"  
+
+  /algo/{owner}/{algoName}/download:
+    get:
+      tags:
+        - "Algo management API"
+      summary: "Retrieve algo source code"
+      description: "The request delivers the source code of the selected algo in yaml format."
+      operationId: "getAlgoCode"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/algoName"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/yaml:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AlgoSourceCode"              
+                  - $ref: "#/components/schemas/InternalError"
+        "401":
+          $ref: "#/components/responses/401"          
+        "403":
+          $ref: "#/components/responses/403"  
+        "404":
+          $ref: "#/components/responses/404"
+
+  /algo/{owner}/{algoName}/run:
+    get:
+      tags:
+        - "Algo management API"
+      summary: "Run algo"
+      description: The request runs the specified algo and returns the result data.
+      operationId: "runAlgo"
+      parameters:
+        - $ref: "#/components/parameters/owner"
+        - $ref: "#/components/parameters/algoName"
+        - $ref: "#/components/parameters/marketId"
+        - $ref: "#/components/parameters/exchange"
+        - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/asset"
+        - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/additional"
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AlgoResults'
+                  - $ref: "#/components/schemas/InternalError"              
+              example: 
+              - algo: spread
+                protocol: STAT total 3 elements with 138 bytes written STAT written json output 665 bytes
+                series:
+                  - content:
+                      spread:
+                        - 0.56
+                        - 0.56
+                        - 0.57
+                      time:
+                        - '1617778892600025600'
+                        - '1617778990086829476'
+                        - '1617779136058371713'
+                    name: bid_ask
+                values:
+                  - content: {}
+                    name: message
+                  
+        "401":
+          $ref: "#/components/responses/401"
+        "403":
+          $ref: "#/components/responses/403" 
+        "404":
+          $ref: "#/components/responses/404"          
+        
+components:
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+  requestBodies:
+    putAlgoBody:
+      description: "Algo source code"
+      required: true
+      content:
+        application/yaml:
+          schema:
+            $ref: '#/components/schemas/AlgoSourceCode'        
+  parameters:
+    owner:
+      name: owner
+      in: path
+      description: Username of the owner of the algo.
+      example: "dbag"
+      required: true
+      schema:
+        type: string
+    algoName:
+      name: algoName
+      in: path
+      description: Name of the algo.
+      example: "spread"
+      required: true
+      schema:
+        type: string
+    batchId:
+      name: batchId
+      in: path
+      description: "Identifier for the batch job of an algo."
+      example: "a1b2c3d4"
+      required: true
+      schema:
+        type: integer
+    marketId:
+      name: marketId
+      in: query
+      description: >
+        Unique market identifier code as specified in ISO 10383 on T7.<br/>
+        <b>Please note: 'marketId' parameter is MANDATORY for running algos on T7 instruments</b>
+      example: "XEUR"
+      required: false
+      schema:
+        type: string
+    exchange:
+      name: exchange
+      in: query
+      description: >
+        Unique exchange identifier on CME.<br/>
+        <b>Please note: 'exchange' parameter is MANDATORY for running algos on CME instruments</b>
+      example: "XCME"
+      required: false
+      schema:
+        type: string
+    date:
+      name: date
+      in: query
+      description: "Trading day in the format  YYYYMMDD."
+      example: "20190912"
+      required: true
+      schema:
+        type: string
+    batchDate:
+      name: batchDate
+      in: query
+      description: >
+        If `mode=batch` the start date and time of the batch job has to be defined with this parameter.<br/>
+        Format =  YYYYMMDDhhmmss.
+      example: "20200106081500"
+      required: false
+      schema:
+        type: "string"
+    asset:
+      name: asset
+      in: query
+      description: >
+        Unique asset identifier on CME.<br/>
+        <b>Please note: 'asset' parameter is MANDATORY for running algos on CME instruments</b>
+      example: "GE"
+      required: false
+      schema:
+        type: string
+    marketSegmentId:
+      name: marketSegmentId
+      in: query
+      description: >
+        Unique product identifier or product pool identifier on T7.<br/>
+        <b>Please note: 'marketSegmentID' parameter is MANDATORY for running algos on T7 instruments</b>
+      example: "675"
+      required: false
+      schema:
+        type: integer
+        format: int32
+    mode:
+      name: mode
+      in: query
+      description: >
+        Define the mode of the algo run.<br/>
+        Mode options:
+          * `get` - Run the algo and return the results
+          * `batch` - Create a batch job and return the batchId to identify the batch job
+      required: false
+      schema:
+        type: string
+        enum: [ get, batch]
+        example:
+          "get"
+        default: "get"
+    additional:
+      name: additional
+      in: query
+      style: form
+      description: >
+        The query string of this endpoint can also be used to specify additional algo specific parameters. The parameters just have to be added with `&` to the query.<br/>
+        The following rules apply:
+          * `name=value` is used to specify a parameter.<br/>
+            <b>Example:</b> level=1
+          * `&` is used to combine multiple parameters with a logical AND.<br/>
+            <b>Example:</b> aggr=4&level=1
+            
+        To test the feature in this document, please add the parameters in a valid JSON object.</br>
+        <b>Example:</b> {"aggr":4,"level":1}
+      required: false
+      schema:
+        type: object
+    securityId:
+      name: securityId
+      in: query
+      description: "Unique security identifier."
+      example: "2657579"
+      required: true
+      schema:
+        type: integer
+        format: int64
+    inputFormat:
+      name: inputFileFormat
+      in: query
+      description: >
+        Type of the files which contain the algo code.<br/>
+        Supported file types:
+         * `json` - Textfile in json format
+         * `yaml` - Textfile in yaml format
+      required: false
+      schema:
+        type: string
+        enum: [ json, yaml ]
+        example:
+          "json"
+        default: 
+          "json"
+  schemas:
+    AlgosCompact:
+      properties:
+        Algos:
+          type: array
+          items:
+            type: string
+          example:
+            - "Depth"
+            - "Insights"
+            - "Stats"
+    AlgosDetailed:
+      properties:
+        algos:
+          type: array
+          items:
+            type: object
+            properties:
+              Name: 
+                type: string
+              Parameters:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Name: 
+                      type: string
+                    Type: 
+                      type: string
+              Resultset:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Name: 
+                      type: string
+                    Fields: 
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          Name:
+                            type: string
+                          Type:
+                            type: string
+                          Nullable:
+                            type: string
+            items:
+              type: object
+          example:
+            - Name: Algo1
+              Parameters:
+                - Name: "Field1"
+                  Type: "int32"
+                - Name: "Field2"
+                  Type: "int64"
+              ResultSet:
+                - Name: "Trades"
+                  Fields:
+                  - Name: "Field1"
+                    Type: "FLOAT"
+                    Nullable: "true"
+                  - Name: "Field2"
+                    Type: "FLOAT"
+                    Nullable: "true"
+                  - Name: "Field3"
+                    Type: "TIME"
+                    Nullable: "False"
+            - Name: "Algo2"
+              Parameters:
+                - Name: "Field1"
+                  Type: "int32"
+                - Name: "Field2"
+                  Type: "int64"
+              ResultSet:
+                - Name: "Trades"
+                  Fields:
+                  - Name: "Field1"
+                    Type: "FLOAT"
+                    Nullable: "true"
+                  - Name: "Field2"
+                    Type: "FLOAT"
+                    Nullable: "true"
+                  - Name: "Field3"
+                    Type: "TIME"
+                    Nullable: "False"
+    AlgoConfiguration:
+      type: string
+      format: json
+      description: "Configuration parameters in json format."
+    AlgoResults:
+      type: string
+      format: json
+      description: "Algo result data in json format."    
+    AlgoSourceCode:
+      type: string
+      format: yaml
+      description: "Algo source code in yaml format."
+      example: "Algo source code in yaml format."
+    HttpError:
+      properties:
+        code:
+          type: string
+          example: "403"
+        message:
+          type: string
+          example: "Specific error message"
+      required:
+        - code
+        - message
+    InternalError:
+      properties:
+        success:
+          type: string
+          example: "false"
+        message:
+          type: string
+          example: "Specific error message"
+      required:
+        - success
+        - message
+    Owners:
+      properties:
+        Owners:
+          type: array
+          items:
+            type: string
+          example:
+            - "Owner1"
+            - "Owner2"
+            - "Owner3"
+            
+  responses:
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example:
+            "Specific error message."
+    403:
+      description: Forbidden resource
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/HttpError"
+
+    404:
+      description: Not found
+            
+security:
+  - bearerAuth: []

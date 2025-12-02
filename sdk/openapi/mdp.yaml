@@ -1,0 +1,420 @@
+openapi: 3.0.0
+info:
+  title: A7 Analytics Platform - CME Market data API (MDP)
+  description: >
+    A7 Analytics Platform for the CME Group.
+    The platform enables clients to perform pre/at/post trade analysis and to interact with market data and analytics.It provides clients access to the most granular un-normalized/genuine historical order book data (SD) as well as constructed order books, off-the-shelf analytics and allows them to build their own custom analytics utilizing algo functionality.<br/><br/>
+    The A7 data can be accessed either via the <a href="https://a7.deutsche-boerse.com/">user interface</a> or via RESTful API.</br></br>
+    The market data API provides access to the A7 (MDP) market data for the available markets and trading days. All available endpoints are described in detail below.<br/><br/>
+    In this documentation only the general data types of the respective fields are described. For the exact data types please refer to the CME documentation.</br>
+    For compatibility reasons fields of type signed/unsigned Int64 (e.g SecurityID) are returned as string.</br></br>
+    
+    <b>Security measures:</b></br>
+    In order to prevent unauthorized access to the API an authentication token must be used. A7 utilises the bearer authentication scheme for this purpose. The authentication token must be added to the header of each request message. Depending on the implementation it might be necessary to add the keyword "Bearer" to the token string as a prefix followed by a space.</br></br>
+    A token can be generated at the <a href="https://a7.deutsche-boerse.com/">A7 user interface</a>. After login the user has to click on the user icon in the upper right corner, click on <b>API token generation</b> and finally click on <b>Request API key</b>. The generated token will be displayed directly in the user interface.<br/><br/>
+  contact:
+    name: Deutsche Börse Data & Analytics
+    url: https://www.mds.deutsche-boerse.com
+    email: analytics@deutsche-boerse.com
+  version: 1.1.0
+servers:
+  - url: /api/v1
+    description: A7 production environment
+paths:
+  /mdp:
+    get:
+      tags:
+        - Exchanges, assets, securities
+      summary: retrieves list of exchanges
+      description: The request delivers all available exchanges.
+      operationId: getExchanges
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/exchanges'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /mdp/{exchange}:
+    get:
+      tags:
+        - Exchanges, assets, securities
+      summary: retrieves list of trading days
+      description: The request delivers all available trading days (YYYYMMDD) for the selected exchange.
+      operationId: getAvailableDates
+      parameters:
+        - $ref: '#/components/parameters/exchange'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/dates'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /mdp/{exchange}/{date}:
+    get:
+      tags:
+        - Exchanges, assets, securities
+      summary: retrieves list of assets
+      description: The request delivers a list of all available assets for the selected exchange and trading day.
+      operationId: getAssets
+      parameters:
+        - $ref: '#/components/parameters/exchange'
+        - $ref: '#/components/parameters/date'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/assets'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /mdp/{exchange}/{date}/{asset}:
+    get:
+      tags:
+        - Exchanges, assets, securities
+      summary: retrieves list of securities
+      description: The request delivers a list of all available securities for the selected exchange, trading day and asset.
+      operationId: getSecurityIds
+      parameters:
+        - $ref: '#/components/parameters/exchange'
+        - $ref: '#/components/parameters/date'
+        - $ref: '#/components/parameters/asset'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/securityIDs'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /mdp/{exchange}/{date}/{asset}/{securityId}:
+    get:
+      tags:
+        - Sending times, packets, messages
+      summary: retrieves list of packets' sending times, or complete packets
+      description: The request delivers a list of the available sending times, or alternatively complete packets for the selected exchange, trading day, asses and security.
+      operationId: getTransactTimes
+      parameters:
+        - $ref: '#/components/parameters/exchange'
+        - $ref: '#/components/parameters/date'
+        - $ref: '#/components/parameters/asset'
+        - $ref: '#/components/parameters/securityID'
+        
+        - $ref: '#/components/parameters/mode'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/msgSeqNum'
+        - $ref: '#/components/parameters/templateID'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/sendingTimes'
+                  - $ref: '#/components/schemas/packetDetails'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+  /mdp/{exchange}/{date}/{asset}/{securityId}/{sendingTime}:
+    get:
+      tags:
+        - Sending times, packets, messages
+      summary: retrieves packet details
+      description: >
+        The request delivers the details of the packet identified by the selected exchange, trading day, asset, security and packet's sending time.</br> 
+        For a detailed description of the different message types please refer to the CME MDP documentation.
+      operationId: getPacketDetails
+      parameters:
+        - $ref: '#/components/parameters/exchange'
+        - $ref: '#/components/parameters/date'
+        - $ref: '#/components/parameters/asset'
+        - $ref: '#/components/parameters/securityID'
+        - $ref: '#/components/parameters/sendingTime'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/packetDetail'
+                  - $ref: '#/components/schemas/InternalError'
+        401:
+          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+components:
+  securitySchemes:
+    bearerAuth:       
+      type: http
+      scheme: bearer
+  parameters:
+    exchange:
+      name: exchange
+      in: path
+      description: exhange identifier code
+      required: true
+      schema:
+        $ref: '#/components/schemas/exchange'
+    date:
+      name: date
+      in: path
+      required: true
+      description: trading day in the format YYYYMMDD
+      schema:
+        $ref: '#/components/schemas/date'
+    asset:
+      name: asset
+      in: path
+      description: unique asset identifier
+      required: true
+      schema:
+        $ref: '#/components/schemas/asset'
+    securityID:
+      name: securityId
+      in: path
+      description: unique security identifier
+      required: true
+      schema:
+        $ref: '#/components/schemas/securityID'
+    sendingTime:
+      name: sendingTime
+      in: path
+      description: packet's sending time
+      required: true
+      schema:
+        $ref: '#/components/schemas/timestamp'
+    mode:
+      name: mode
+      in: query
+      description: >
+        Define the output format for the response.<br/>
+        Mode options:
+          * `reference` (default) - Shows a list of the referencing IDs
+          * `detailed` - Shows a list of packets with messages including their details
+      required: false
+      schema:
+        type: string
+        enum: [reference,detailed]
+        default: reference
+    limit:
+      name: limit
+      in: query
+      description: max number of elements in the response
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 10000
+        default: 1000
+        example: 10
+    from:
+      name: from
+      in: query
+      description: array of packet's sending times as start times for (multiple) time interval selection (multiple values are separated by comma)
+      required: false
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/timestamp'
+      style: form
+      explode: false
+    to:
+      name: to
+      in: query
+      description: packet's sending time as a global end time for (multiple) time interval selection
+      required: false
+      schema:
+        $ref: '#/components/schemas/timestamp'
+      example: 
+    msgSeqNum:
+      name: msgSeqNum
+      in: query
+      description: array of packet's sequence numbers used as a filter to select packets (multiple values are separated by comma)
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 22902064
+      style: form
+      explode: false
+    templateID:
+      name: templateId
+      in: query
+      description: array of templateIDs used as a filter to select packets (multiple values are separated by comma)
+      required: false
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 46
+      style: form
+      explode: false
+  schemas:
+    exchange:
+      description: exchange mic
+      type: string
+      minLength: 4
+      maxLength: 4
+      example: XCME
+    exchanges:
+      type: object
+      properties:
+        Exchanges:
+          description: array of exchange mics
+          type: array
+          items:
+            $ref: '#/components/schemas/exchange'
+          example: [XCBT,XCEC,XCME,XFXS,XNYM]
+    date:
+      description: date representation
+      type: integer
+      format: int32
+      minLength: 8
+      maxLength: 8
+      example: 20230111
+    dates:
+      type: object
+      properties:
+        Dates:
+          description: array of dates
+          type: array
+          items:
+            $ref: '#/components/schemas/date'
+          example: [20230111,20230112,20230113]
+    asset:
+      description: asset code also known as product code
+      type: string
+      maxLength: 6
+      example: ES
+    assets:
+      type: object
+      properties:
+        Assets:
+          description: array of assets
+          type: array
+          items:
+            $ref: '#/components/schemas/asset'
+          example: [ES,GE,ZN]
+    securityID:
+      description: Security ID
+      type: integer
+      format: int32
+      example: 206299
+    securityIDs:
+      type: object
+      properties:
+        SecurityIDs:
+          description: array of security IDs
+          type: array
+          items:
+            $ref: '#/components/schemas/securityID'
+          example: [206299,95414,3445]
+    timestamp:
+      description: timestamp as number of nanoseconds since Unix epoch
+      type: string
+      example: "1673390700086106154"
+    sendingTimes:
+      type: object
+      properties:
+        SendingTimes:
+          description: array of packets' sending times
+          type: array
+          items:
+            $ref: '#/components/schemas/timestamp'
+          example: ["1673390700086106154","1673390700088531122","1673390700088549040"]
+    packetDetail:
+      description: packet's details
+      type: object
+      properties:
+        Messages:
+          description: packet header, size header, messages
+          type: object
+    packetDetails:
+      type: object
+      properties:
+        Packets:
+          description: array of packets' details
+          type: array
+          items:
+            description: array of packet's details
+            type: array
+            items:
+              description: packet header, size header, messages
+              type: object
+    InternalError:
+      properties:
+        success:
+          type: string
+          example: false
+        message:
+          type: string
+          example: Error message
+      required:
+        - success
+        - message
+  responses:
+    401:
+      description: Authorization failed
+      content:
+        text/plain:
+          schema:
+            type: string   
+          example: Specific error message.
+    403:
+      description: Access denied
+      content:
+        text/plain:
+          schema:
+            type: string
+          example: Specific error message.
+    404:
+      description: Not found
+security:
+  - bearerAuth: []
