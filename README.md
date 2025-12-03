@@ -1,7 +1,7 @@
 
 # [A7® Analytics Platform](https://a7.deutsche-boerse.com/)
 
-[![A7 info](https://a7.deutsche-boerse.com/static/media/infox.fd9c588f.png)]((https://youtu.be/ToEAIMcZqwI))
+[![A7 info](usecases/images/infox.png)](https://youtu.be/ToEAIMcZqwI)
 
 ### Ad hoc insights from high precision market data
 
