@@ -22,6 +22,36 @@ for key in ["HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy"]:
     if key in os.environ:
         del os.environ[key]
 
+# Helper function to show truncated output in smart way
+def print_truncated(obj, indent="   "):
+    if isinstance(obj, list):
+        print(f"{indent}List with {len(obj)} items (showing first 5):")
+        for i, item in enumerate(obj[:5]):
+            print(f"{indent}Item {i+1}:")
+            print_truncated(item, indent + "  ")
+    elif isinstance(obj, dict):
+        for key, value in obj.items():
+            if key == 'series' and isinstance(value, list):
+                print(f"{indent}• series: List[{len(value)}]")
+                for s in value[:3]:
+                    if isinstance(s, dict) and 'name' in s:
+                        content_info = ""
+                        if 'content' in s and isinstance(s['content'], dict):
+                            counts = [f"{k}[{len(v)}]" if isinstance(v, list) else k for k, v in s['content'].items()]
+                            content_info = f", content keys: {', '.join(counts)}"
+                        print(f"{indent}  - name: {s['name']}{content_info}")
+                    else:
+                            print(f"{indent}  - {str(s)[:50]}...")
+                if len(value) > 3:
+                    print(f"{indent}  - ... ({len(value)-3} more)")
+            else:
+                val_str = str(value)
+                if len(val_str) > 100:
+                    val_str = val_str[:100] + "..."
+                print(f"{indent}• {key}: {val_str}")
+    else:
+        print(f"{indent}{obj}")
+
 
 def main():
     client = A7Client(
@@ -71,21 +101,35 @@ def main():
     # 4. Run an algorithm
     print("\n4. Running 'dbag/top_level' algorithm:")
     try:
+        params = {
+            "marketId": "XETR",
+            "date": 20230804,
+            "marketSegmentId": 52885,
+            "securityId": "2504978"
+        }
+        print(f"   Parameters: {params}")
         result = client.algo.run(
             owner="dbag",
             algorithm="top_level",
-            params={
-                "marketId": "XETR",
-                "date": 20230804,
-                "marketSegmentId": 52885,
-                "securityId": "2504978"
-            }
+            params=params
         )
         print(f"   Algorithm executed successfully")
-        if isinstance(result, dict):
-            print(f"   Result keys: {list(result.keys())[:5]}")
-        elif isinstance(result, list):
-            print(f"   Result: {len(result)} items")
+        print(f"   Result type: {type(result)}")
+        
+        # Raw truncated output
+        if isinstance(result, list):
+            print(f"   Result (first 5 items, truncated):")
+            for item in result[:5]:
+                # Truncate the string representation of the item to avoid flooding the console
+                item_str = str(item)
+                if len(item_str) > 100:
+                    item_str = item_str[:100] + "..."
+                print(f"   • {item_str}")
+        else:
+            print(f"   Result: {result}")
+
+        print("\n   Smart Output:")
+        print_truncated(result)
     except Exception as e:
         print(f"   (Not available: {e})")
 
