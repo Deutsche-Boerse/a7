@@ -127,7 +127,7 @@ class EOBIResource:
         date: int,
         market_segment_id: int,
         security_id: int,
-        mode: Optional[str] = None,
+        mode: str = "reference",
         limit: Optional[int] = None,
         from_time: Optional[str] = None,
         to_time: Optional[str] = None,
@@ -141,7 +141,7 @@ class EOBIResource:
             date: Trading day in YYYYMMDD format
             market_segment_id: Market segment ID
             security_id: Security ID
-            mode: 'compact' or 'detailed' (default: 'compact')
+            mode: 'reference' or 'detailed' (default: 'reference')
             limit: Maximum number of results (optional)
             from_time: Starting timestamp filter (optional)
             to_time: Ending timestamp filter (optional)
@@ -188,7 +188,7 @@ class EOBIResource:
         market_segment_id: int,
         security_id: int,
         transact_time: str,
-        mode: str = "compact",
+        mode: str = "reference",
         msgseq_filter: Optional[str] = None,
         template_id_filter: Optional[str] = None,
     ) -> list[int] | list[dict[str, Any]]:
@@ -201,12 +201,12 @@ class EOBIResource:
             market_segment_id: Market segment ID
             security_id: Security ID
             transact_time: Transaction time (nanoseconds since 1970)
-            mode: 'compact' returns list of numbers, 'detailed' returns packets
+            mode: 'reference' returns list of numbers, 'detailed' returns packets
             msgseq_filter: Message sequence number filter (optional)
             template_id_filter: Template ID filter (optional)
 
         Returns:
-            List of ApplSeqNum values if mode='compact',
+            List of ApplSeqNum values if mode='reference',
             or list of packet details if mode='detailed'
 
         Raises:
@@ -244,7 +244,7 @@ class EOBIResource:
         security_id: int,
         transact_time: str,
         applseq_num: int,
-        mode: str = "compact",
+        mode: str = "reference",
         template_id_filter: Optional[str] = None,
     ) -> list[int] | list[dict[str, Any]]:
         """
@@ -257,11 +257,11 @@ class EOBIResource:
             security_id: Security ID
             transact_time: Transaction time (nanoseconds since 1970)
             applseq_num: Application sequence number
-            mode: 'compact' returns list of numbers, 'detailed' returns messages
+            mode: 'reference' returns list of numbers, 'detailed' returns messages
             template_id_filter: Template ID filter (optional)
 
         Returns:
-            List of MsgSeqNum values if mode='compact',
+            List of MsgSeqNum values if mode='reference',
             or list of message details if mode='detailed'
 
         Raises:

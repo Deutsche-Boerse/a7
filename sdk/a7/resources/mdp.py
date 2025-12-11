@@ -126,7 +126,7 @@ class MDPResource:
         date: int,
         asset: str,
         security_id: int,
-        mode: str = "compact",
+        mode: str = "reference",
         limit: Optional[int] = None,
         from_time: Optional[str] = None,
         to_time: Optional[str] = None,
@@ -141,7 +141,7 @@ class MDPResource:
             date: Trading day in YYYYMMDD format
             asset: Asset code (e.g., 'BZ', 'GE')
             security_id: Security ID
-            mode: 'compact' returns list of times, 'detailed' returns packets
+            mode: 'reference' returns list of times, 'detailed' returns packets
             limit: Maximum number of results (optional)
             from_time: Starting timestamp filter (optional)
             to_time: Ending timestamp filter (optional)
@@ -149,7 +149,7 @@ class MDPResource:
             template_id: Template ID filter (optional)
 
         Returns:
-            List of sending times if mode='compact',
+            List of sending times if mode='reference',
             or list of packet details if mode='detailed'
 
         Raises:
