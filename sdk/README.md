@@ -824,6 +824,20 @@ This is an educational project demonstrating the A7 API. Contributions are welco
 
 ## Changelog
 
+### Version 0.2.3 (2025-12-11)
+
+**Bug Fixes & Documentation Improvements**
+
+#### Bug Fixes
+- **EOBI & MDP Resources**: Fixed `mode` parameter default value. Changed from `"compact"` to `"reference"` to align with OpenAPI specifications. This affects:
+  - `eobi.get_transact_times()`
+  - `eobi.get_applseq_nums()`
+  - `eobi.get_msg_seq_nums()`
+  - `mdp.get_sending_times()`
+
+#### Documentation
+- Added more verbose and comprehensive usage examples to better demonstrate SDK capabilities.
+
 ### Version 0.2.0 (2025-11-02)
 
 **Major Release - Complete API Coverage**

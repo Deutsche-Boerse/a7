@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "a7"
-version = "0.2.2"
+version = "0.2.3"
 description = "A simple, synchronous Python SDK for the A7 Analytics Platform by Deutsche Börse"
 readme = "README.md"
 requires-python = ">=3.9"
