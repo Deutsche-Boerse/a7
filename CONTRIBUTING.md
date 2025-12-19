@@ -186,10 +186,11 @@ ruff check . && ruff format . && pyright
 # Example: __version__ = "0.3.0"
 
 # 4. Build the package
-python -m build
+# Note: On Windows with Group Policy restrictions, use --no-isolation
+python -m build --no-isolation
 
 # 5. Check the built package
-twine check dist/*
+python -m twine check dist/*
 ```
 
 ### Upload to PyPI
@@ -199,10 +200,10 @@ twine check dist/*
 pip install twine
 
 # Upload to PyPI (requires authentication)
-twine upload dist/*
+python -m twine upload dist/*
 
 # Or upload to TestPyPI first for verification
-twine upload --repository testpypi dist/*
+python -m twine upload --repository testpypi dist/*
 ```
 
 ### Post-Release
