@@ -37,6 +37,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/exchanges'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/exchanges'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:
@@ -61,6 +67,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/dates'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/dates'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:
@@ -86,6 +98,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/assets'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/assets'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:
@@ -112,6 +130,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/securityIDs'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/securityIDs'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:
@@ -147,6 +171,13 @@ paths:
                   - $ref: '#/components/schemas/sendingTimes'
                   - $ref: '#/components/schemas/packetDetails'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/sendingTimes'
+                  - $ref: '#/components/schemas/packetDetails'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:
@@ -177,6 +208,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/packetDetail'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/packetDetail'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         401:
           $ref: '#/components/responses/401'
         403:

@@ -71,6 +71,16 @@ paths:
                 MarketIDs:
                   - "XETR"
                   - "XEUR"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MarketIDs"
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
+              example: 
+                MarketIDs:
+                  - "XETR"
+                  - "XEUR"
 
               
         "401":
@@ -96,6 +106,16 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Dates"
                   - $ref: "#/components/schemas/InternalError"
+              example:
+                Dates:
+                  - 20200629
+                  - 20200630
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Dates"
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
               example:
                 Dates:
                   - 20200629
@@ -129,6 +149,17 @@ paths:
                   - 3
                   - 5
                   - 21
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MarketSegmentIDs"
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
+              example:
+                MarketSegmentIDs:
+                  - 3
+                  - 5
+                  - 21
         "401":
           $ref: "#/components/responses/401"
         "404":
@@ -154,6 +185,17 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/SecurityIDs"
                   - $ref: "#/components/schemas/InternalError"
+              example: 
+                SecurityIDs:
+                  - 2346321
+                  - 3426522
+                  - 3242343
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/SecurityIDs"
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
               example: 
                 SecurityIDs:
                   - 2346321
@@ -196,6 +238,17 @@ paths:
                   - "1589175000156121100"
                   - "1589180100007332308"
                   - "1589180400061095876"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TransactTimes"
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
+              example:
+                TransactTimes:
+                  - "1589175000156121100"
+                  - "1589180100007332308"
+                  - "1589180400061095876"
 
         "401":
           $ref: "#/components/responses/401"
@@ -230,6 +283,13 @@ paths:
                   - $ref: '#/components/schemas/ApplSeqNums'
                   - $ref: '#/components/schemas/Packets'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ApplSeqNums'
+                  - $ref: '#/components/schemas/Packets'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         "401":
           $ref: "#/components/responses/401"
         "404":
@@ -263,6 +323,13 @@ paths:
                   - $ref: '#/components/schemas/MsgSeqNums'
                   - $ref: '#/components/schemas/Messages'
                   - $ref: '#/components/schemas/InternalError'
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MsgSeqNums'
+                  - $ref: '#/components/schemas/Messages'
+                  - $ref: '#/components/schemas/InternalError'
+                format: binary
         "401":
           $ref: "#/components/responses/401"
         "404":
@@ -306,6 +373,25 @@ paths:
                 SecurityTradingEvent: null
                 SoldOutIndicator: null
                 TransactTime: "1589180100007258166"              
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/MessageDetails"
+                  - $ref: '#/components/schemas/InternalError'
+              example:
+                MessageHeader: 
+                  BodyLen: 32
+                  TemplateID: 13301
+                  MsgSeqNum: 27
+                ApplSeqNum: 6745122
+                SecurityID: 4233128
+                SecurityStatus: 1
+                SecurityTradingStatus: 204
+                MarketCondition: 0
+                FastMarketIndicator: 0
+                SecurityTradingEvent: null
+                SoldOutIndicator: null
+                TransactTime: "1589180100007258166"
         "401":
           $ref: "#/components/responses/401"
         "404":

@@ -36,6 +36,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Owners'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/Owners'
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -63,6 +67,12 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/Jobs"
                   - $ref: "#/components/schemas/InternalError" 
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/Jobs"
+                  - $ref: "#/components/schemas/InternalError" 
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -91,6 +101,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/JobDefinition'
                   - $ref: "#/components/schemas/InternalError" 
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/JobDefinition'
+                  - $ref: "#/components/schemas/InternalError" 
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -121,6 +137,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/SuccessMessage'
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/SuccessMessage'
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -147,6 +169,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessMessage'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -173,6 +199,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessMessage'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -198,7 +228,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessMessage'
-                
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -227,6 +260,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/Dates'
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Dates'
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -256,6 +295,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/Tasks'
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Tasks'
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -286,6 +331,12 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/Results'
                   - $ref: "#/components/schemas/InternalError"                  
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Results'
+                  - $ref: "#/components/schemas/InternalError"                  
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -319,6 +370,13 @@ paths:
                   - $ref: '#/components/schemas/DataJson'
                   - $ref: '#/components/schemas/DataRaw'
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/DataJson'
+                  - $ref: '#/components/schemas/DataRaw'
+                  - $ref: "#/components/schemas/InternalError"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
