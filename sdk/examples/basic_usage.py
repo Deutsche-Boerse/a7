@@ -39,7 +39,7 @@ def main():
     # 2. Get market segments for a specific market and date
     print("\n2. Market Segments for XETR on 2023-08-04:")
     try:
-        segments = client.rdi.get_market_segments("XETR", ref_date=20230804)
+        segments = client.rdi.get_market_segments("XETR", date=20230804)
         print(f"   Found {len(segments)} segments")
         if segments:
             seg = segments[0]

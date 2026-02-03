@@ -182,20 +182,20 @@ def test_data():
             "exchange": "XCME",
             "date": 20220915,
             "asset": "BZ",
-            "security_id": "12345",
+            "security_id": 12345,
         },
         # CME Markets - Additional test cases from examples
         "cme_cbcm": {
             "exchange": "CBCM",
             "date": 20241129,
             "asset": "ZQ",
-            "security_id": "42433670",
+            "security_id": 42433670,
         },
         "cme_glbx": {
             "exchange": "GLBX",
             "date": 20180227,
             "asset": "USDCAD",
-            "security_id": "577527",
+            "security_id": 577527,
         },
         # Algorithm testing - dbag/top_level is a public algo
         "algo": {
@@ -213,19 +213,19 @@ def test_data():
         "auction": {
             "exchange": "XETR",
             "date": 20230111,
-            "market_segment_id": "52915",
+            "market_segment_id": 52915,
             "security_id": 2506257,
             "symbol": "DAX",
         },
         "auction_cases": [
             # TPE - SDAX security
-            {"exchange": "XETR", "date": 20240109, "market_segment_id": "53007", "security_id": 2505100, "symbol": "TPE", "index": "SDAX"},
+            {"exchange": "XETR", "date": 20240109, "market_segment_id": 53007, "security_id": 2505100, "symbol": "TPE", "index": "SDAX"},
             # SZU - SDAX security
-            {"exchange": "XETR", "date": 20241204, "market_segment_id": "53002", "security_id": 2505095, "symbol": "SZU", "index": "SDAX"},
+            {"exchange": "XETR", "date": 20241204, "market_segment_id": 53002, "security_id": 2505095, "symbol": "SZU", "index": "SDAX"},
             # VOW3 - DAX security
-            {"exchange": "XETR", "date": 20250212, "market_segment_id": "53021", "security_id": 2505114, "symbol": "VOW3", "index": "DAX"},
+            {"exchange": "XETR", "date": 20250212, "market_segment_id": 53021, "security_id": 2505114, "symbol": "VOW3", "index": "DAX"},
             # BNR - DAX security
-            {"exchange": "XETR", "date": 20220915, "market_segment_id": "52360", "security_id": 2504453, "symbol": "BNR", "index": "DAX"},
+            {"exchange": "XETR", "date": 20220915, "market_segment_id": 52360, "security_id": 2504453, "symbol": "BNR", "index": "DAX"},
         ],
         # Insights - Pace of Roll testing - multiple segments and rolls from examples
         "insights": {

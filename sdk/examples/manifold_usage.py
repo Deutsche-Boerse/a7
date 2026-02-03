@@ -58,7 +58,7 @@ def main():
 
         # Get market segments for Eurex (XEUR) - using a historical date with data
         print("\n2. Getting market segments for XEUR")
-        segments = client.rdi.get_market_segments("XEUR", ref_date=20241017)
+        segments = client.rdi.get_market_segments("XEUR", date=20241017)
         print(f"   Found {len(segments)} market segments")
         if segments:
             print(f"   First 3 segments: {segments[:3]}")
@@ -68,9 +68,9 @@ def main():
         try:
             details = client.rdi.get_security_details(
                 market_id="XEUR",
-                ref_date=20241017,
-                segment_id=688,
-                security_id="204934"
+                date=20241017,
+                market_segment_id=688,
+                security_id=204934
             )
             print(f"   Security details: {details}")
         except NotFoundError:

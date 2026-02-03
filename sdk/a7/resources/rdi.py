@@ -42,13 +42,13 @@ class RDIResource:
         response.raise_for_status()
         return response.json()
 
-    def get_market_segments(self, market_id: str, ref_date: int) -> list[dict[str, Any]]:
+    def get_market_segments(self, market_id: str, date: int) -> list[dict[str, Any]]:
         """
         Get market segments for a specific market and date.
 
         Args:
             market_id: Market identifier (e.g., 'XEUR', 'XETR')
-            ref_date: Reference date in YYYYMMDD format
+            date: Reference date in YYYYMMDD format
 
         Returns:
             List of market segment IDs
@@ -64,25 +64,25 @@ class RDIResource:
             >>> print(len(segments))
             42
         """
-        response = self._client.get(f"/v2/rdi/{market_id}/{ref_date}/")
+        response = self._client.get(f"/v2/rdi/{market_id}/{date}/")
         response.raise_for_status()
         return response.json()
 
     def get_security_details(
         self,
         market_id: str,
-        ref_date: int,
-        segment_id: int,
-        security_id: str,
+        date: int,
+        market_segment_id: int,
+        security_id: int,
     ) -> dict[str, Any]:
         """
         Get detailed security information.
 
         Args:
             market_id: Market identifier (e.g., 'XEUR', 'XETR')
-            ref_date: Reference date in YYYYMMDD format
-            segment_id: Market segment ID
-            security_id: Security identifier
+            date: Reference date in YYYYMMDD format
+            market_segment_id: Market segment ID
+            security_id: Security ID
 
         Returns:
             Security details dictionary with RDI messages
@@ -94,10 +94,10 @@ class RDIResource:
             ServerError: Server error occurred
 
         Example:
-            >>> details = client.rdi.get_security_details('XEUR', 20250101, 688, '204934')
+            >>> details = client.rdi.get_security_details('XEUR', 20250101, 688, 204934)
             >>> print(details)
         """
-        response = self._client.get(f"/v2/rdi/{market_id}/{ref_date}/{segment_id}/{security_id}")
+        response = self._client.get(f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}")
         response.raise_for_status()
         return response.json()
 
@@ -105,7 +105,7 @@ class RDIResource:
         self,
         market_id: str,
         date: int,
-        segment_id: int,
+        market_segment_id: int,
         security_id: int,
         msg_seq_num: int,
     ) -> list[dict[str, Any]]:
@@ -115,7 +115,7 @@ class RDIResource:
         Args:
             market_id: Market identifier (e.g., 'XETR')
             date: Date in YYYYMMDD format
-            segment_id: Market segment ID
+            market_segment_id: Market segment ID
             security_id: Security ID
             msg_seq_num: Message sequence number
 
@@ -136,7 +136,7 @@ class RDIResource:
             'InstrumentSnapshot'
         """
         response = self._client.get(
-            f"/v2/rdi/{market_id}/{date}/{segment_id}/{security_id}/{msg_seq_num}"
+            f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}/{msg_seq_num}"
         )
         response.raise_for_status()
         return response.json()
