@@ -164,7 +164,11 @@ class SDResource:
         return response.json()
 
     def get_security_details(
-        self, exchange: str, date: int, asset: str, security_id: str
+        self,
+        exchange: str,
+        date: int,
+        asset: str,
+        security_id: int
     ) -> dict[str, Any]:
         """
         Get security details for a specific security.
@@ -173,7 +177,7 @@ class SDResource:
             exchange: Exchange identifier (e.g., 'XCME')
             date: Date in YYYYMMDD format
             asset: Asset identifier (e.g., 'GE')
-            security_id: Security ID (as string)
+            security_id: Security ID
 
         Returns:
             Security details dictionary including all CME reference fields
@@ -185,9 +189,7 @@ class SDResource:
             ServerError: Server error occurred
 
         Example:
-            >>> details = client.sd.get_security_details(
-            ...     'XCME', 20200106, 'GE', '12345678'
-            ... )
+            >>> details = client.sd.get_security_details('XCME', 20200106, 'GE', 12345678)
             >>> print(details['Symbol'])
             >>> print(details['MaturityDate'])
         """

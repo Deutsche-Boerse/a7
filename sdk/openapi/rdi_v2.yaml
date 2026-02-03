@@ -12,8 +12,8 @@ info:
       * InstrumentSnapshot (d)
       * TotalReturnFutureStatus (f)
       * TradeAtReferencePriceStatus (f)
-      * VarianceFuturesStatus (f)
-    
+      * VarianceFuturesStatus (f)    
+
     In this documentation the different message types are not specified in full detail and only the general data types of the respective fields are described. For compatibility reasons fields of type signed/unsigned Int64 (e.g SecurityID) are returned as string. For the exact data types please refer to the T7 RDI documentation available at the [Xetra](https://www.xetra.com/xetra-en/technology/t7/system-documentation) or [Eurex](https://www.eurex.com/ex-en/support/initiatives) homepage.</br>
     
     Please be aware that depending on the date for which you are requesting data a different version of the T7 documentation has to be used.</br>
@@ -47,7 +47,7 @@ info:
 servers:
   - url: /api/v2
     description: A7 production environment
-    
+ 
 paths:
   /rdi/:
     get:
@@ -63,6 +63,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Markets"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Markets"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -86,6 +90,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Dates"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Dates"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -110,6 +118,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MarketSegments"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/MarketSegments"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -127,6 +139,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/marketId"
         - $ref: "#/components/parameters/date"
+        - $ref: "#/components/parameters/annotation"
       responses:
         "200":
           description: "successful operation"
@@ -134,6 +147,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MarketSegmentsOverview"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/MarketSegmentsOverview"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -159,6 +176,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Securities"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Securities"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -177,6 +198,7 @@ paths:
         - $ref: "#/components/parameters/marketId"
         - $ref: "#/components/parameters/date"
         - $ref: "#/components/parameters/marketSegmentId"
+        - $ref: "#/components/parameters/annotation"
       responses:
         "200":
           description: "successful operation"
@@ -184,6 +206,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MarketSegmentDetails"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/MarketSegmentDetails"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -210,6 +236,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Messages"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Messages"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -229,6 +259,7 @@ paths:
         - $ref: "#/components/parameters/date"
         - $ref: "#/components/parameters/marketSegmentId"
         - $ref: "#/components/parameters/securityId"
+        - $ref: "#/components/parameters/annotation"
       responses:
         "200":
           description: "successful operation"
@@ -236,6 +267,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SecurityDetails"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -256,6 +291,7 @@ paths:
         - $ref: "#/components/parameters/marketSegmentId"
         - $ref: "#/components/parameters/securityId"
         - $ref: "#/components/parameters/msgSeqNum"        
+        - $ref: "#/components/parameters/annotation"
       responses:
         "200":
           description: "successful operation"
@@ -263,6 +299,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MessageDetails"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/MessageDetails"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -859,6 +899,17 @@ components:
         - message
 
   parameters:
+    acceptHeader:
+      name: "Accept"
+      in: "header"
+      description: "Specifies the response format. Supported values are 'application/json' and 'application/gzip'."
+      required: false
+      schema:
+        type: string
+        enum:
+          - application/json
+          - application/gzip
+      example: "application/json"
     marketId:
       name: "marketId"
       in: "path"
@@ -904,6 +955,20 @@ components:
       schema:
         type: integer
         format: int64
+    annotation:
+      name: annotation
+      in: query
+      description: >
+        Define the output format of enumerations.<br/>
+        annotation options:
+          * `unannotated` (default) - enums are represented by their raw values
+          * `humanreadable` - enums are represented by their human readable strings
+          * `annotated` - enums are represented by both their human readable strings and raw values
+      required: false
+      schema:
+        type: string
+        enum: [unannotated,humanreadable,annotated]
+        default: unannotated
 
   responses:
     400:
@@ -912,6 +977,10 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+        application/gzip:
+          schema:
+            $ref: "#/components/schemas/Error"
+            format: binary
     401:
       description: Authorization failed
       content:

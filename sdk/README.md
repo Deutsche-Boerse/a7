@@ -52,15 +52,15 @@ markets = client.rdi.get_markets()
 print("Available markets:", markets)
 
 # Get market segments for a specific date
-segments = client.rdi.get_market_segments("XEUR", ref_date=20250101)
+segments = client.rdi.get_market_segments("XEUR", date=20250101)
 print(f"Found {len(segments)} segments")
 
 # Get detailed security information
 details = client.rdi.get_security_details(
     market_id="XEUR",
-    ref_date=20250101,
-    segment_id=688,
-    security_id="204934"  # Note: parameter is security_id, not instrument_id
+    date=20250101,
+    market_segment_id=688,
+    security_id=204934
 )
 print("Security details:", details)
 ```
@@ -153,22 +153,22 @@ markets = client.rdi.get_markets()
 # Get market segments for a trading day
 segments = client.rdi.get_market_segments(
     market_id="XEUR",
-    ref_date=20250101
+    date=20250101
 )
 
 # Get detailed security information
 details = client.rdi.get_security_details(
     market_id="XEUR",
-    ref_date=20250101,
-    segment_id=688,
-    security_id="204934"  # Note: uses security_id parameter per OpenAPI spec
+    date=20250101,
+    market_segment_id=688,
+    security_id=204934
 )
 
 # Get instrument snapshot
 snapshot = client.rdi.get_instrument_snapshot(
     market_id="XETR",
     date=20201104,
-    segment_id=52162,
+    market_segment_id=52162,
     security_id=2504233,
     msg_seq_num=106
 )
@@ -193,7 +193,7 @@ details = client.sd.get_security_details(
     exchange="XCME",
     date=20200106,
     asset="GE",
-    security_id="12345678"
+    security_id=12345678
 )
 ```
 
@@ -260,7 +260,7 @@ message = client.eobi.get_message(
     date=20200227,
     market_segment_id=187421,
     security_id=204934,
-    transact_time=1582821000143045889,
+    transact_time="1582821000143045889",
     applseq_num=14687296,
     msg_seq_num=23
 )
@@ -282,7 +282,7 @@ times = client.mdp.get_sending_times(
     exchange="XCME",
     date=20220915,
     asset="BZ",
-    security_id="12345",
+    security_id=12345,
     mode="compact"
 )
 
@@ -291,8 +291,8 @@ message = client.mdp.get_message(
     exchange="XCME",
     date=20220915,
     asset="BZ",
-    security_id="12345",
-    sending_time=1663191900206448987,
+    security_id=12345,
+    sending_time="1663191900206448987",
     msg_seq_num=86054
 )
 ```
@@ -308,8 +308,8 @@ orderbook = client.orderbook.get_t7(
     date=20200227,
     market_segment_id=187421,
     security_id=204934,
-    from_time=1582821000000000000,
-    to_time=1582821100000000000,
+    from_time="1582821000000000000",
+    to_time="1582821100000000000",
     limit=10,
     levels=5,
     orderbook=True,
@@ -322,7 +322,7 @@ orderbook = client.orderbook.get_cme(
     exchange="XCME",
     date=20220915,
     asset="BZ",
-    security_id="12345",
+    security_id=12345,
     limit=10,
     levels=10
 )
@@ -364,10 +364,10 @@ Access pre-calculated market analytics:
 ```python
 # Pace of Roll (POR) insights
 segments = client.insights.get_por_market_segments()
-rolls = client.insights.get_por_rolls("segment_id")
+rolls = client.insights.get_por_rolls("FDAX")
 data = client.insights.get_por_data(
-    market_segment="segment_id",
-    roll="roll_id",
+    market_segment="FDAX",
+    roll=202512,
     days=10,
     n=20,
     comp="c"  # 'c' for concurrent, 's' for serial
@@ -443,7 +443,7 @@ securities = client.auction.get_securities("XETR", 20230111, "52915")
 types = client.auction.get_auction_types(
     exchange="XETR",
     date=20230111,
-    market_segment_id="52915",
+    market_segment_id=52915,
     security_id=2506257
 )
 
@@ -451,7 +451,7 @@ types = client.auction.get_auction_types(
 auction = client.auction.get_auction(
     exchange="XETR",
     date=20230111,
-    market_segment_id="52915",
+    market_segment_id=52915,
     security_id=2506257,
     auction_type="opening"
 )
@@ -460,7 +460,7 @@ auction = client.auction.get_auction(
 simulated = client.auction.get_auction(
     exchange="XETR",
     date=20230111,
-    market_segment_id="52915",
+    market_segment_id=52915,
     security_id=2506257,
     auction_type="opening",
     side="buy",
@@ -473,7 +473,7 @@ simulated = client.auction.get_auction(
 auction = client.auction.get_auction_by_symbol(
     exchange="XETR",
     date=20230111,
-    symbol="DAX",
+    symbol="DB1",
     auction_type="opening"
 )
 ```
@@ -495,7 +495,7 @@ from a7 import (
 client = A7Client(token="YOUR_A7_TOKEN")
 
 try:
-    data = client.rdi.get_security_details("XEUR", 20250101, 688, "invalid_id")
+    data = client.rdi.get_security_details("XEUR", 20250101, 688, 0)
 except AuthenticationError:
     print("Invalid API token")
 except NotFoundError:
@@ -708,9 +708,9 @@ Complete list of all available methods organized by resource:
 | Method | Description |
 |--------|-------------|
 | `get_markets()` | List available T7 markets |
-| `get_market_segments(market_id, ref_date)` | Get segments for a market |
-| `get_security_details(market_id, ref_date, segment_id, security_id)` | Get security details |
-| `get_instrument_snapshot(market_id, date, segment_id, security_id, msg_seq_num)` | Get instrument snapshot |
+| `get_market_segments(market_id, date)` | Get segments for a market |
+| `get_security_details(market_id, date, market_segment_id, security_id)` | Get security details |
+| `get_instrument_snapshot(market_id, date, market_segment_id, security_id, msg_seq_num)` | Get instrument snapshot |
 
 ### SD (Security Details - CME)
 | Method | Description |
@@ -798,9 +798,9 @@ Complete list of all available methods organized by resource:
 | `get_dates(exchange)` | Get dates for exchange |
 | `get_market_segments(exchange, date, mode)` | Get market segments |
 | `get_securities(exchange, date, market_segment_id)` | Get securities |
-| `get_auction_types(...)` | Get auction types for security |
-| `get_auction(...)` | Get/simulate auction data |
-| `get_auction_by_symbol(...)` | Get auction by symbol |
+| `get_auction_types(exchange, date, market_segment_id, security_id)` | Get auction types for security |
+| `get_auction(exchange, date, market_segment_id, security_id, auction_type, ...)` | Get/simulate auction data |
+| `get_auction_by_symbol(exchange, date, symbol, auction_type, ...)` | Get auction by symbol |
 
 ## Contributing
 

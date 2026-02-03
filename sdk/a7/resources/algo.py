@@ -159,7 +159,8 @@ class AlgoResource:
         self,
         market: str,
         date: int,
-        instrument_id: str,
+        market_segment_id: int,
+        security_id: int,
     ) -> dict[str, Any]:
         """
         Run top_level algorithm (convenience method).
@@ -167,13 +168,14 @@ class AlgoResource:
         Args:
             market: Market identifier (e.g., 'XEUR')
             date: Date in YYYYMMDD format
-            instrument_id: Instrument identifier
+            market_segment_id: Market segment ID
+            security_id: Security ID
 
         Returns:
             Top level order book data
 
         Example:
-            >>> data = client.algo.run_top_level('XEUR', 20250101, '204934')
+            >>> data = client.algo.run_top_level('XEUR', 20250101, 688, 204934)
         """
         return self.run(
             owner="a7",
@@ -181,7 +183,8 @@ class AlgoResource:
             params={
                 "marketId": market,
                 "date": date,
-                "securityId": instrument_id,
+                "marketSegmentId": market_segment_id,
+                "securityId": security_id,
             },
         )
 
@@ -189,7 +192,8 @@ class AlgoResource:
         self,
         market: str,
         date: int,
-        instrument_id: str,
+        market_segment_id: int,
+        security_id: int,
         level: int = 5,
     ) -> dict[str, Any]:
         """
@@ -198,14 +202,15 @@ class AlgoResource:
         Args:
             market: Market identifier (e.g., 'XEUR')
             date: Date in YYYYMMDD format
-            instrument_id: Instrument identifier
+            market_segment_id: Market segment ID
+            security_id: Security ID
             level: Order book depth level (default: 5)
 
         Returns:
             Multi-level order book data
 
         Example:
-            >>> data = client.algo.run_price_level_v2('XEUR', 20250101, '204934', level=10)
+            >>> data = client.algo.run_price_level_v2('XEUR', 20250101, 688, 204934, level=10)
         """
         return self.run(
             owner="a7",
@@ -213,7 +218,8 @@ class AlgoResource:
             params={
                 "marketId": market,
                 "date": date,
-                "securityId": instrument_id,
+                "marketSegmentId": market_segment_id,
+                "securityId": security_id,
                 "Level": level,
             },
         )

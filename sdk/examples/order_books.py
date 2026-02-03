@@ -110,7 +110,7 @@ def main():
                     exchange="XCME",
                     date=20220915,
                     asset=sample_asset,
-                    security_id=str(securities[0]),
+                    security_id=securities[0],
                     limit=1,
                     levels=5
                 )

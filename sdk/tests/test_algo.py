@@ -25,7 +25,7 @@ def test_run_algorithm_success(mock_client: A7Client) -> None:
     result = mock_client.algo.run(
         owner="a7",
         algorithm="top_level",
-        params={"market": "XEUR", "date": 20250101, "instrument_id": "204934"},
+        params={"marketId": "XEUR", "date": 20250101, "marketSegmentId": 688, "securityId": 204934},
     )
 
     assert result["status"] == "success"
@@ -41,7 +41,7 @@ def test_run_top_level_helper(mock_client: A7Client) -> None:
         return_value=httpx.Response(200, json=mock_response)
     )
 
-    result = mock_client.algo.run_top_level("XEUR", 20250101, "204934")
+    result = mock_client.algo.run_top_level("XEUR", 20250101, 688, 204934)
 
     assert result["status"] == "success"
 
@@ -55,7 +55,7 @@ def test_run_price_level_v2_helper(mock_client: A7Client) -> None:
         return_value=httpx.Response(200, json=mock_response)
     )
 
-    result = mock_client.algo.run_price_level_v2("XEUR", 20250101, "204934", level=10)
+    result = mock_client.algo.run_price_level_v2("XEUR", 20250101, 688, 204934, level=10)
 
     assert result["status"] == "success"
     assert route.called
@@ -80,7 +80,7 @@ def test_run_algorithm_auth_error(mock_client: A7Client) -> None:
     )
 
     with pytest.raises(httpx.HTTPStatusError):
-        mock_client.algo.run_top_level("XEUR", 20250101, "204934")
+        mock_client.algo.run_top_level("XEUR", 20250101, 688, 204934)
 
 
 @respx.mock

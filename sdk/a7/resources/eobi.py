@@ -305,8 +305,8 @@ class EOBIResource:
         Args:
             market_id: Market identifier (e.g., 'XEUR')
             date: Date in YYYYMMDD format
-            market_segment_id: Market segment ID (formerly partition_id)
-            security_id: Security ID (formerly packet_seq_num)
+            market_segment_id: Market segment ID
+            security_id: Security ID
             transact_time: Transaction timestamp (nanoseconds since 1970)
             applseq_num: Application sequence number
             msg_seq_num: Message sequence number

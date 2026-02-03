@@ -37,7 +37,7 @@ def test_get_mdp_message_nyum_success(mock_client: A7Client) -> None:
         date=20220915,
         asset="BZ",
         security_id=86054,
-        sending_time=1663191900206448987,
+        sending_time="1663191900206448987",
     )
 
     assert "Messages" in result
@@ -77,7 +77,7 @@ def test_get_mdp_message_xcbt_success(mock_client: A7Client) -> None:
         date=20250606,
         asset="00C",
         security_id=42037732,
-        sending_time=1749159840081860246,
+        sending_time="1749159840081860246",
     )
 
     assert "Messages" in result
@@ -99,7 +99,7 @@ def test_get_mdp_message_not_found(mock_client: A7Client) -> None:
             date=20220915,
             asset="BZ",
             security_id=99999,
-            sending_time=1663191900206448987,
+            sending_time="1663191900206448987",
         )
 
 
@@ -116,5 +116,5 @@ def test_get_mdp_message_auth_error(mock_client: A7Client) -> None:
             date=20220915,
             asset="BZ",
             security_id=86054,
-            sending_time=1663191900206448987,
+            sending_time="1663191900206448987",
         )

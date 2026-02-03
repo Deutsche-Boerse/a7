@@ -60,7 +60,7 @@ def test_get_security_details_success(mock_client: A7Client) -> None:
         return_value=httpx.Response(200, json=mock_response)
     )
 
-    details = mock_client.rdi.get_security_details("XEUR", 20250101, 688, "204934")
+    details = mock_client.rdi.get_security_details("XEUR", 20250101, 688, 204934)
 
     assert details["instrumentId"] == "204934"
     assert details["segmentId"] == 688

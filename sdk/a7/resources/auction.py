@@ -101,7 +101,7 @@ class AuctionResource:
         response.raise_for_status()
         return response.json()
 
-    def get_securities(self, exchange: str, date: int, market_segment_id: str) -> list[int]:
+    def get_securities(self, exchange: str, date: int, market_segment_id: int) -> list[int]:
         """
         Get security IDs for a market segment.
 
@@ -119,7 +119,7 @@ class AuctionResource:
             ServerError: Server error occurred
 
         Example:
-            >>> securities = client.auction.get_securities('XETR', 20230111, '52915')
+            >>> securities = client.auction.get_securities('XETR', 20230111, 52915)
             >>> print(securities)
             [2506257, 2506258, ...]
         """
@@ -130,7 +130,7 @@ class AuctionResource:
         return response.json()
 
     def get_security(
-        self, exchange: str, date: int, market_segment_id: str, security_id: int
+        self, exchange: str, date: int, market_segment_id: int, security_id: int
     ) -> dict[str, Any]:
         """
         Get security reference data by segment ID and security ID.
@@ -151,7 +151,7 @@ class AuctionResource:
 
         Example:
             >>> security = client.auction.get_security(
-            ...     'XETR', 20230111, '52915', 2506257
+            ...     'XETR', 20230111, 52915, 2506257
             ... )
             >>> print(security['symbol'])
         """
@@ -168,7 +168,7 @@ class AuctionResource:
         Args:
             exchange: Exchange MIC (e.g., 'XETR')
             date: Date in YYYYMMDD format
-            symbol: Trading symbol (e.g., 'DAX', 'SAP')
+            symbol: Trading symbol (e.g., 'DB1', 'SAP')
 
         Returns:
             Security reference data
@@ -180,7 +180,7 @@ class AuctionResource:
 
         Example:
             >>> security = client.auction.get_security_by_symbol(
-            ...     'XETR', 20230111, 'DAX'
+            ...     'XETR', 20230111, 'DB1'
             ... )
             >>> print(security['securityID'])
         """
@@ -189,7 +189,11 @@ class AuctionResource:
         return response.json()
 
     def get_auction_types(
-        self, exchange: str, date: int, market_segment_id: str, security_id: int
+        self,
+        exchange: str,
+        date: int,
+        market_segment_id: int,
+        security_id: int
     ) -> list[str]:
         """
         Get available auction types for a security.
@@ -210,7 +214,7 @@ class AuctionResource:
 
         Example:
             >>> types = client.auction.get_auction_types(
-            ...     'XETR', 20230111, '52915', 2506257
+            ...     'XETR', 20230111, 52915, 2506257
             ... )
             >>> print(types)
             ['opening', 'intraday', 'closing']
@@ -228,7 +232,7 @@ class AuctionResource:
         Args:
             exchange: Exchange MIC (e.g., 'XETR')
             date: Date in YYYYMMDD format
-            symbol: Trading symbol (e.g., 'DAX', 'SAP')
+            symbol: Trading symbol (e.g., 'DB1', 'SAP')
 
         Returns:
             List of auction types (e.g., ['opening', 'intraday', 'closing'])
@@ -240,7 +244,7 @@ class AuctionResource:
 
         Example:
             >>> types = client.auction.get_auction_types_by_symbol(
-            ...     'XETR', 20230111, 'DAX'
+            ...     'XETR', 20230111, 'DB1'
             ... )
             >>> print(types)
             ['opening', 'closing']
@@ -253,7 +257,7 @@ class AuctionResource:
         self,
         exchange: str,
         date: int,
-        market_segment_id: str,
+        market_segment_id: int,
         security_id: int,
         auction_type: str,
         side: Optional[str] = None,
@@ -290,12 +294,12 @@ class AuctionResource:
         Example:
             >>> # Get historical data only
             >>> auction = client.auction.get_auction(
-            ...     'XETR', 20230111, '52915', 2506257, 'opening'
+            ...     'XETR', 20230111, 52915, 2506257, 'opening'
             ... )
 
             >>> # Simulate with additional order
             >>> simulated = client.auction.get_auction(
-            ...     'XETR', 20230111, '52915', 2506257, 'opening',
+            ...     'XETR', 20230111, 52915, 2506257, 'opening',
             ...     side='buy', px=100.50, qty=1000, prio=1
             ... )
             >>> print(simulated['simulation']['executionPrice'])
@@ -337,7 +341,7 @@ class AuctionResource:
         Args:
             exchange: Exchange MIC (e.g., 'XETR')
             date: Date in YYYYMMDD format
-            symbol: Trading symbol (e.g., 'DAX', 'SAP')
+            symbol: Trading symbol (e.g., 'DB1', 'SAP')
             auction_type: Auction type ('opening', 'intraday', 'closing')
             side: Optional order side ('buy' or 'sell') for simulation
             px: Optional limit price for simulation
@@ -356,12 +360,12 @@ class AuctionResource:
         Example:
             >>> # Get historical data only
             >>> auction = client.auction.get_auction_by_symbol(
-            ...     'XETR', 20230111, 'DAX', 'opening'
+            ...     'XETR', 20230111, 'DB1', 'opening'
             ... )
 
             >>> # Simulate with additional order
             >>> simulated = client.auction.get_auction_by_symbol(
-            ...     'XETR', 20230111, 'DAX', 'opening',
+            ...     'XETR', 20230111, 'DB1', 'opening',
             ...     side='buy', px=15000.0, qty=10
             ... )
             >>> print(simulated['simulation']['executionPrice'])

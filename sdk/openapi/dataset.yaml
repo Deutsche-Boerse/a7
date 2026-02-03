@@ -157,6 +157,10 @@ paths:
             text/csv:
               schema:
                 $ref: "#/components/schemas/DatasetResults"
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/DatasetResultsWithMeta'
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":

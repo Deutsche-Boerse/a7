@@ -38,6 +38,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Exchanges"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Exchanges"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -58,6 +62,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Dates"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Dates"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -80,6 +88,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Assets"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/Assets"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -104,6 +116,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SecurityIDs"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/SecurityIDs"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -131,6 +147,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SecurityDetails"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -158,6 +178,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SecurityDetails"
+            application/gzip:
+              schema:
+                $ref: "#/components/schemas/SecurityDetails"
+                format: binary
         "400":
           $ref: "#/components/responses/400"
         "401":
@@ -328,6 +352,16 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Error"
+    200:
+      description: "successful operation"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Exchanges"
+        application/gzip:
+          schema:
+            type: string
+            format: binary
 
 security:
   - bearerAuth: []

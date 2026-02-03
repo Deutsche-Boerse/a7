@@ -46,15 +46,15 @@ class TestRDI:
     def test_get_market_segments_returns_list(self, client, show_responses):
         """Test 2.1: Verify get_market_segments returns segment list."""
         market_id = "XEEE"
-        ref_date = 20240812
+        date = 20240812
         
         segments = client.rdi.get_market_segments(
             market_id=market_id,
-            ref_date=ref_date
+            date=date
         )
         assert isinstance(segments, list)
         assert len(segments) > 0
-        print(f"\n✅ Found {len(segments)} market segments for {market_id} on {ref_date}")
+        print(f"\n✅ Found {len(segments)} market segments for {market_id} on {date}")
         print_response(segments, show_responses, truncate=1000)
 
     @skip_if_not_found
@@ -62,7 +62,7 @@ class TestRDI:
         """Test 2.2: Verify get_market_segments works for XEUR."""
         segments = client.rdi.get_market_segments(
             market_id="XEUR",
-            ref_date=20200227
+            date=20200227
         )
         assert isinstance(segments, list)
         print(f"\n✅ Found {len(segments)} segments for XEUR")
@@ -73,9 +73,9 @@ class TestRDI:
         """Test 3.1: Verify get_security_details returns security data."""
         details = client.rdi.get_security_details(
             market_id="XEEE",
-            ref_date=20240812,
-            segment_id=154574,
-            security_id="11340477"
+            date=20240812,
+            market_segment_id=154574,
+            security_id=11340477
         )
         assert details is not None
         print(f"\n✅ Retrieved security details")
@@ -88,7 +88,7 @@ class TestRDI:
         snapshot = client.rdi.get_instrument_snapshot(
             market_id="XETR",
             date=20190402,
-            segment_id=52087,
+            market_segment_id=52087,
             security_id=2504158,
             msg_seq_num=54
         )
@@ -107,7 +107,7 @@ class TestRDI:
         snapshot = client.rdi.get_instrument_snapshot(
             market_id="XETR",
             date=20250212,
-            segment_id=52242,
+            market_segment_id=52242,
             security_id=2504335,
             msg_seq_num=711
         )
@@ -237,7 +237,7 @@ class TestAlgo:
                 "marketId": test_data["t7"]["market_id"],
                 "date": test_data["t7"]["date"],
                 "marketSegmentId": test_data["t7"]["market_segment_id"],
-                "securityId": str(test_data["t7"]["security_id"])
+                "securityId": test_data["t7"]["security_id"]
             }
         )
         # Result can be dict or list depending on algorithm
@@ -642,9 +642,9 @@ class TestNegativeScenarios:
         with pytest.raises((NotFoundError, httpx.HTTPStatusError)) as exc_info:
             client.rdi.get_security_details(
                 market_id="XEUR",
-                ref_date=20200227,
-                segment_id=999999,
-                security_id="9999999"
+                date=20200227,
+                market_segment_id=999999,
+                security_id=9999999
             )
         if isinstance(exc_info.value, httpx.HTTPStatusError):
             assert exc_info.value.response.status_code == 404

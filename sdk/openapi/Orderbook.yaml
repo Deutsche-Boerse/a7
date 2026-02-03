@@ -73,6 +73,13 @@ paths:
                   - $ref: "#/components/schemas/T7Orderbook"
                   - $ref: "#/components/schemas/T7Orderbooks"
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/T7Orderbook"
+                  - $ref: "#/components/schemas/T7Orderbooks"
+                  - $ref: "#/components/schemas/InternalError"
+              format: binary
               
         "401":
           $ref: "#/components/responses/401"
@@ -109,6 +116,13 @@ paths:
                   - $ref: "#/components/schemas/CMEOrderbook"
                   - $ref: "#/components/schemas/CMEOrderbooks"
                   - $ref: "#/components/schemas/InternalError"
+            application/gzip:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/CMEOrderbook"
+                  - $ref: "#/components/schemas/CMEOrderbooks"
+                  - $ref: "#/components/schemas/InternalError"
+              format: binary
         "401":
           $ref: "#/components/responses/401"
         "404":

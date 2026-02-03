@@ -78,7 +78,7 @@ def main():
         security = client.auction.get_security(
             exchange="XETR",
             date=20240109,
-            market_segment_id="53007",
+            market_segment_id=53007,
             security_id=2505100
         )
         print(f"   Symbol: {security.get('Symbol')}")
@@ -119,7 +119,7 @@ def main():
         auction_types = client.auction.get_auction_types(
             exchange="XETR",
             date=20230111,
-            market_segment_id="52915",
+            market_segment_id=52915,
             security_id=2506257
         )
         print(f"   Available types: {', '.join(auction_types)}")
@@ -132,7 +132,7 @@ def main():
         auction = client.auction.get_auction(
             exchange="XETR",
             date=20230111,
-            market_segment_id="52915",
+            market_segment_id=52915,
             security_id=2506257,
             auction_type="opening"
         )
@@ -148,7 +148,7 @@ def main():
         simulated = client.auction.get_auction(
             exchange="XETR",
             date=20230111,
-            market_segment_id="52915",
+            market_segment_id=52915,
             security_id=2506257,
             auction_type="opening",
             side="buy",

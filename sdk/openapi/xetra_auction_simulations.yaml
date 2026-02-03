@@ -39,6 +39,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/exchange'
                 example: [XETR,XEUR,XEEE]
+            application/gzip:
+              schema:
+                type: array
+                format: binary
+                items:
+                  $ref: '#/components/schemas/exchange'
+                example: [XETR,XEUR,XEEE]
         400:
           $ref: '#/components/responses/400'
         401:
@@ -67,6 +74,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/date'
                 example: [20230111,20230112,20230113]
+            application/gzip:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/date'
+                example: [20230111,20230112,20230113]
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
@@ -98,6 +112,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/marketSegmentIDorSymbol'
                 example: ["52915","52378","54105"]
+            application/gzip:
+              schema:
+                type: array
+                format: binary
+                items:
+                  $ref: '#/components/schemas/marketSegmentIDorSymbol'
+              example: ["52915","52378","54105"]
         400:
           $ref: '#/components/responses/400'
         401:
@@ -128,6 +149,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/securityID'
                 example: [2506257]
+            application/gzip:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/securityID'
+                example: [2506257]
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
@@ -155,6 +183,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/security'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/security'
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
@@ -181,6 +213,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/security'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/security'
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
@@ -212,6 +248,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/auctionType'
                 example: [opening,intraday,closing]
+            application/gzip:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/auctionType'
+                format: binary
+                example: [opening,intraday,closing]
         400:
           $ref: '#/components/responses/400'
         401:
@@ -241,6 +284,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/auctionType'
+                example: [opening,intraday,closing]
+            application/gzip:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/auctionType'
+                format: binary
                 example: [opening,intraday,closing]
         400:
           $ref: '#/components/responses/400'
@@ -275,6 +325,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/auction'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/auction'
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
@@ -307,6 +361,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/auction'
+            application/gzip:
+              schema:
+                $ref: '#/components/schemas/auction'
+                format: binary
         400:
           $ref: '#/components/responses/400'
         401:
