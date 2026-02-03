@@ -74,6 +74,7 @@ class RDIResource:
         date: int,
         market_segment_id: int,
         security_id: int,
+        annotation: str = "unannotated",
     ) -> dict[str, Any]:
         """
         Get detailed security information.
@@ -83,6 +84,7 @@ class RDIResource:
             date: Reference date in YYYYMMDD format
             market_segment_id: Market segment ID
             security_id: Security ID
+            annotation: 'unannotated', 'humanreadable' or 'annotated' (default: 'unannotated') enumerations
 
         Returns:
             Security details dictionary with RDI messages
@@ -97,7 +99,7 @@ class RDIResource:
             >>> details = client.rdi.get_security_details('XEUR', 20250101, 688, 204934)
             >>> print(details)
         """
-        response = self._client.get(f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}")
+        response = self._client.get(f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}?annotation={annotation}")
         response.raise_for_status()
         return response.json()
 
@@ -108,6 +110,7 @@ class RDIResource:
         market_segment_id: int,
         security_id: int,
         msg_seq_num: int,
+        annotation: str = "unannotated",
     ) -> list[dict[str, Any]]:
         """
         Get RDI v2 instrument snapshot message.
@@ -118,6 +121,7 @@ class RDIResource:
             market_segment_id: Market segment ID
             security_id: Security ID
             msg_seq_num: Message sequence number
+            annotation: 'unannotated', 'humanreadable' or 'annotated' (default: 'unannotated') enumerations
 
         Returns:
             List of instrument snapshot messages
@@ -136,7 +140,7 @@ class RDIResource:
             'InstrumentSnapshot'
         """
         response = self._client.get(
-            f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}/{msg_seq_num}"
+            f"/v2/rdi/{market_id}/{date}/{market_segment_id}/{security_id}/{msg_seq_num}?annotation={annotation}"
         )
         response.raise_for_status()
         return response.json()
