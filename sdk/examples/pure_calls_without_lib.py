@@ -14,9 +14,9 @@ OWNER = "your_userid"  # Replace with your A7 login
 API_TOKEN = "your_token"
 ALGO_NAME = "testing_algo"  # Name of the algo to upload/download/delete/run
 ALGO_FILE = "testing_algo.yml"
-SECURITY_ID = 2504978  # Unique security identifier on T7 (example: FGBL = 4611674, DBAG = 2504978)
-MARKET_SEGMENT_ID = 52885  # # Unique product identifier or product pool identifier of market on T7 (example: 688 is XEUR, XETR = 52885)
-MARKET_ID = "XETR"  # Market identifier code as specified in ISO 10383 (XEE, XETR, XEUR)
+SECURITY_ID = 2504978  # Unique security identifier on T7 (example: for XEUR 4611674 is FGBL SI 20200908 PS, for XETR 2504978 is DEUTSCHE BOERSE NA O.N.)
+MARKET_SEGMENT_ID = 52885  # # Unique product identifier or product pool identifier of market on T7 (example: for XEUR 688 is FGBL, for XETR 52885 is DB1)
+MARKET_ID = "XETR"  # Market identifier code as specified in ISO 10383 (XEEE, XETR, XEUR)
 DATA_DATE = "20230804"  # Data Date
 OUTPUT_FILE = "OUTPUT"  # Output to CSV file
 LIMIT_OUTPUT_TO = 15 # Global setting for limiting JSON output. Set to 0 for unlimited

@@ -42,7 +42,7 @@ def main():
     # 2. Get market segments for Xetra
     print("\n2. Market Segments for XETR (Xetra) on 2023-08-04:")
     try:
-        segments = client.rdi.get_market_segments("XETR", ref_date=20230804)
+        segments = client.rdi.get_market_segments("XETR", date=20230804)
         print(f"   Found {len(segments)} segments")
         if segments:
             seg = segments[0]
@@ -58,9 +58,9 @@ def main():
     try:
         details = client.rdi.get_security_details(
             market_id="XETR",
-            ref_date=20230804,
-            segment_id=52885,
-            security_id="2504978"
+            date=20230804,
+            market_segment_id=52885,
+            security_id=2504978
         )
         if isinstance(details, list) and len(details) > 0:
             d = details[0]
@@ -78,7 +78,7 @@ def main():
         snapshot = client.rdi.get_instrument_snapshot(
             market_id="XETR",
             date=20250212,
-            segment_id=52242,
+            market_segment_id=52242,
             security_id=2504335,
             msg_seq_num=711
         )
@@ -137,7 +137,7 @@ def main():
             exchange="CBCM",
             date=20241129,
             asset="ZQ",
-            security_id="42433670"
+            security_id=42433670
         )
         if isinstance(details, list) and len(details) > 0:
             d = details[0]
@@ -160,7 +160,7 @@ def main():
             exchange="GLBX",
             date=20180227,
             asset="USDCAD",
-            security_id="577527"
+            security_id=577527
         )
         if isinstance(details, list) and len(details) > 0:
             d = details[0]

@@ -190,7 +190,7 @@ class MDPResource:
         date: int,
         asset: str,
         security_id: int,
-        sending_time: int,
+        sending_time: str,
     ) -> dict[str, Any]:
         """
         Get MDP packet/message details by identifier.
@@ -213,7 +213,7 @@ class MDPResource:
 
         Example:
             >>> msg = client.mdp.get_message(
-            ...     'NYUM', 20220915, 'BZ', 86054, 1663191900206448987
+            ...     'NYUM', 20220915, 'BZ', 86054, '1663191900206448987'
             ... )
             >>> print(msg['Messages'][0]['MsgSeqNum'])
             271039433
